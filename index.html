@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <link href="style.css" rel="stylesheet">
+
+    <title>Encrypted Site</title>
+</head>
+
+<body class="text-center">
+    <form class="form-signin" id="staticrypt-form">
+        <img src="https://thred.group/assets/wordmark/THREDGROUP/ThredGroup(black).png" alt="" style="width: 100%;">
+        <label for="staticrypt-password" class="sr-only">Password</label>
+        <input type="password" id="staticrypt-password" class="form-control mb-3 mt-3" placeholder="Password" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"
+            integrity="sha384-lp4k1VRKPU9eBnPePjnJ9M2RF3i7PC30gXs70+elCVfgwLwx1tv5+ctxdtwxqZa7"
+            crossorigin="anonymous"></script>
+    <script src="encrypted.js"></script>
+    <script src="decrypt.js"></script>
+</body>
+</html>
