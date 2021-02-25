@@ -8,12 +8,12 @@ from os.path import dirname
 SAEdir = dirname(__file__)
 
 # read data into dataframes
-params=read_excel(SAEdir+"\\params.xlsx", engine='openpyxl')
-materials=read_csv(SAEdir+"\\materials.csv")
-tires=read_csv(SAEdir+"\\tires.csv")
-motors=read_csv(SAEdir+"\\motors.csv")
-brakes=read_csv(SAEdir+"\\brakes.csv")
-suspension=read_csv(SAEdir+"\\suspension.csv")
+params=read_excel(SAEdir+"\\resources\\params.xlsx", engine='openpyxl')
+materials=read_csv(SAEdir+"\\resources\\materials.csv")
+tires=read_csv(SAEdir+"\\resources\\tires.csv")
+motors=read_csv(SAEdir+"\\resources\\motors.csv")
+brakes=read_csv(SAEdir+"\\resources\\brakes.csv")
+suspension=read_csv(SAEdir+"\\resources\\suspension.csv")
 
 # constants
 v_car = 26.8 # m/s
@@ -33,8 +33,8 @@ weights2 = array([25,1,15,20,15,1,1,15,5,1,1])/100
 weights3 = array([14,1,20,15,25,1,1,10,10,2,1])/100
 
 # simplified model parameters
-slopes=read_csv(SAEdir+"\\slopes.csv").to_numpy()
-constants=read_csv(SAEdir+"\\constants.csv").to_numpy()
+slopes=read_csv(SAEdir+"\\resources\\slopes.csv").to_numpy()
+constants=read_csv(SAEdir+"\\resources\\constants.csv").to_numpy()
 constants = constants.reshape(12,)
         
 class car:
