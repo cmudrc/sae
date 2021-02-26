@@ -283,9 +283,9 @@ class car:
         
         for i in range(19):
             if (getattr(self, params.at[i, 'variable'])<params.at[i, 'min']):
-                pen1.append((params.at[i, 'variable']-params.at[i, 'min'])**2)
+                pen1.append((getattr(self, params.at[i, 'variable'])-params.at[i, 'min'])**2)
             elif (getattr(self, params.at[i, 'variable'])>params.at[i, 'max']):
-                pen1.append((params.at[i, 'variable']-params.at[i, 'max'])**2)
+                pen1.append((getattr(self, params.at[i, 'variable'])-params.at[i, 'max'])**2)
             else:
                 pen1.append(0)
         return(array(pen1))
