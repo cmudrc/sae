@@ -28,7 +28,7 @@ Run in your favorite python compiler:
 ```python
 import SAE.fmincon
 
-# generate a random car that always satisfies type 1 and type 2 constraints
+# generate a random car that always satisfies constraints_bound and constraints_lin_ineq
 test_car = SAE.fmincon.car()
 
 # generate a random car that satisfies all constraints
@@ -55,7 +55,7 @@ dummy_vector = [1]*39
 test_car.set_vec(dummy_vector)
 
 # evaluate constraint violation penalites (square loss)
-test_car.constraints1()
-test_car.constraints2()
-test_car.constraints3()
+test_car.constraints_bound()
+test_car.constraints_lin_ineq()
+test_car.constraints_nonlin_ineq()
 ```

@@ -38,7 +38,7 @@ constants=read_csv(SAEdir+"\\resources\\constants.csv").to_numpy()
 constants = constants.reshape(12,)
         
 class car:
-    # generates a car that satisfies constraints1 and constraints2
+    # generates a car that satisfies constraints_bound and constraints_lin_ineq
     def __init__(self):
         
         # car vector with continuous and integer variables
@@ -278,7 +278,7 @@ class car:
         return(array(obj_simp))
 
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
-    def constraints1(self):
+    def constraints_bound(self):
         pen1 = []
         
         for i in range(19):
@@ -292,7 +292,7 @@ class car:
                   
     # calculates penalty for violating constraints of the type A.{parameters} < b, where A is a matrix and b is a vector
     # both bounds are checked in case lower bound > upper bound
-    def constraints2(self):
+    def constraints_lin_ineq(self):
         pen2 = []
         
         if (self.wrw < 0.3):
@@ -388,7 +388,7 @@ class car:
         return(array(pen2))
         
         # calculates penalty for violating constraints of the type f{parameters} < 0
-    def constraints3(self):
+    def constraints_nonlin_ineq(self):
         pen3 = []
         
         if (self.F_down_total()+self.mass()*gravity-2*self.suspensionForce(self.kfsp,self.cfsp)-2*self.suspensionForce(self.krsp,self.crsp) < 0):
@@ -451,9 +451,9 @@ class car:
     def get_vec(self):
         return(self.vector)
     
-# generates cars until constraints3 satisfied
+# generates cars until constraints_nonlin_ineq satisfied
 def generate_feasible():
     while (True):
         feasible_car = car()
-        if (sum(feasible_car.constraints3()) == 0):
+        if (sum(feasible_car.constraints_nonlin_ineq()) == 0):
             return(feasible_car)
