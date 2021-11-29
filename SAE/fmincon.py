@@ -1,5 +1,5 @@
 # import modules
-from numpy import array, ones, pi, cos, sqrt
+from numpy import array, ones, pi, cos, sqrt, nan, nansum
 from pandas import read_csv, read_excel
 from random import uniform, randint
 from os.path import dirname
