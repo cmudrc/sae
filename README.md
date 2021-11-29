@@ -34,16 +34,24 @@ test_car = SAE.fmincon.car()
 # generate a random car that satisfies all constraints
 test_car = SAE.fmincon.generate_feasible()
 
-# get the 39-dimensional vector that defines the car (0-18, and 29-38 are continuous parameters while 19-28 are integer parameters)
+# get the 39-dimensional vector that defines the car
+# (0-18, and 29-38 are continuous parameters while 19-28 are integer parameters)
 test_car.get_vec()
 
 # get a specific parameter
 test_car.get_param(9)
 
 # evaluate the true objectives - this function takes in 3 arguments
-# first argument - an array of objective weights - use weightsNull for equal weights; use weights1, weights2 or weights3 for weights used in the referenced paper; define a custom numpy array of shape (11,)
-# second argument - with_subobjs = True (default) or False, if False a scalar value of the weighted objective is returned, if True a tuple with the first element as the weighted objective and the second element as an array of sub-objectives is returned
-# thrid argument - tominimize_and_scaled = True (default) or False, if False the sub-objectives array holds physically meaningful values, if True the maximization sub-objectives are negated and all of them are scaled (These are the values that are involved in composing the weighted objective)
+
+# first argument - an array of objective weights - use weightsNull for equal weights; use weights1, weights2 or weights3 for
+# weights used in the referenced paper; define a custom numpy array of shape (11,)
+
+# second argument - with_subobjs = True (default) or False, if False a scalar value of the weighted objective is returned,
+# if True a tuple with the first element as the weighted objective and the second as an array of sub-objectives is returned
+
+# thrid argument - tominimize_and_scaled = True (default) or False, if False the sub-objectives array holds physically
+# meaningful values, if True the maximization sub-objectives are negated and all of them are scaled
+# (These are the values that are involved in composing the weighted objective)
 
 test_car.objectives(SAE.fmincon.weights1, with_subobjs=True, tominimize_and_scaled=True)
 
