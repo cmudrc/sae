@@ -265,23 +265,46 @@ class car:
         lf = 0.5
         return (2*Ffsp*lf + 2*Frsp*lf + downForceRearWing*(lcg - self.lrw) - downForceFrontWing*(lcg-self.lfw) - 2*downForceSideWing*(lcg-self.lsw))
     
-    # objectives (0th is weighted global objective, 1th to 11th are sub - objectives)
-    def objectives(self, weights):
+    # objectives
+    def objectives(self, weights, with_subobjs = True, tominimize_and_scaled = True):
         
-        subobj1=self.mass()
-        subobj2=self.cGy()
-        subobj3=self.F_drag_total()
-        subobj4=self.F_down_total()
-        subobj5=self.acceleration()
-        subobj6=self.crashForce()
-        subobj7=self.iaVolume()
-        subobj8=self.cornerVelocity()
-        subobj9=self.breakingDistance()
-        subobj10=self.suspensionAcceleration()
-        subobj11=self.pitchMoment()
+        all_objectives = [self.mass, self.cGy, self.F_drag_total, self.F_down_total, self.acceleration, self.crashForce, self.iaVolume, self.cornerVelocity, self.breakingDistance, self.suspensionAcceleration, self.pitchMoment]
+    
+        objs = nan*ones(11)
+        objs_physical_vals = nan*ones(11)
         
-        return(array([subobj1*weights[0]+subobj2*weights[1]+subobj3*weights[2]-subobj4*weights[3]-subobj5*weights[4]+subobj6*weights[5]+subobj7*weights[6]-subobj8*weights[7]+subobj9*weights[8]+subobj10*weights[9]+subobj11*weights[10], subobj1, subobj2, subobj3, subobj4, subobj5, subobj6, subobj7, subobj8, subobj9, subobj10, subobj11]))
+        if (with_subobjs == True):
 
+            for i in range(11):
+                objs[i] = all_objectives[i]()
+                objs_physical_vals[i] = objs[i]
+            
+        else:
+            for i in range(11):
+                if(weights[i]!=0):
+                    objs[i]=all_objectives[i]()
+           
+        for i in range(11):
+            if(weights[i]!=0):
+                
+                if (i!=3 and i!=4 and i!=7):
+                    objs[i]=all_objectives[i]()
+                    objs[i] = (objs[i] - mins_to_scale[i])/(maxs_to_scale[i]-mins_to_scale[i])
+                    
+                else:
+                    objs[i]=-all_objectives[i]()
+                    objs[i] = (objs[i] - (-maxs_to_scale[i]))/(-mins_to_scale[i]-(-maxs_to_scale[i]))
+                    
+        global_obj=nansum(objs*weights)
+        
+        if (with_subobjs):
+            if(tominimize_and_scaled):
+                return(global_obj, objs)
+            else:
+                return(global_obj, objs_physical_vals)
+        else:
+            return(global_obj)
+          
     # objectives - simplified (0th is global objective, 1th to 11th are sub - objectives)
     def objectives_simplified(self):
         obj=-2.60077648234996E+05+106864.520319504*self.hrw+259499.987369053*self.lrw+-848.139141453429*self.arw+73589.6397905889*self.hfw+30185.1478638127*self.lfw+5013.6203150032*self.wfw+-76.429932960309*self.afw+21927.087631775*self.hsw+8228.94891316536*self.lsw+10959.4660199945*self.wsw+-4.46280173491686*self.asw+0.22663443814963*self.Prt+9481.7760400474*self.hc+2746.34501256514*self.lc+1373.26088733971*self.wc+1566960.92702331*self.tc+241566.063673235*self.hia+207056.819592253*self.wia+20.4771931748837*self.qrw+4.36546397395431*self.qfw+1.2988137314096*self.qsw+4.16506081819534*self.qc+2.80608364846557*self.qia+3.78349795937538E-05*self.Eia+35.0581394741311*self.rrt+171.037492691539*self.mrt+0.000116415321826934*self.rft+171.037492691539*self.mft+5.82076609134673E-06*self.Phi_e+-0.00155705492943525*self.T_e+85.5187507113441*self.me+-287.826912244781*self.rbrk+0.0410625943914055*self.qbrk+0.146662932820618*self.lbrk+-175.823658355511*self.hbrk+-492.130091879516*self.wbrk+0.000520958565175533*self.krsp+0.000261934474110603*self.crsp+171.037495601922*self.mrsp+0.000515137799084186*self.kfsp+0.000259024091064929*self.cfsp+171.037495601922*self.mfsp+8792.51140868291*self.wrw+0.00578584149479865*self.yrw+0.0012340024113655*self.yfw+0.000366708263754844*self.ysw+0.000398722477257251*self.ye+0.00117579475045204*self.yc+-197778.081693104*self.lia+0.000791624188423156*self.yia+8.73114913702011E-06*self.yrsp+8.73114913702011E-06*self.yfsp
