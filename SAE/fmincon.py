@@ -26,6 +26,10 @@ gravity = 9.81 # m/s^2
 y_suspension = 0.05 # m
 dydt_suspension = 0.025 # m/s
 
+# approximate min max values of objectives
+mins_to_scale = [8.96325388e+01, 1.10388378e-01, 4.87582402e+00, 7.40178613e-03, 0.00000000e+00, 1.63759303e+06, 4.07449546e-03, 5.01136618e-03, 4.82290322e+00, 9.81000625e+00, 2.36372269e-02]
+maxs_to_scale = [4.55795007e+03, 1.00593012e+00, 5.75478378e+02, 3.03849252e+03, 5.12782124e+00, 1.08626437e+08, 1.55501437e-01, 1.50036357e+01, 5.16741180e+02, 1.95994022e+01, 9.82179496e+03]
+
 # weights for composing objective from subobjectives
 weightsNull = ones(11) / 11
 weights1 = array([14,1,20,30,10,1,1,10,10,2,1])/100
