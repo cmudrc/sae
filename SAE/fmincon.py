@@ -263,7 +263,7 @@ class car:
         downForceSideWing = self.F_down_wing(self.wsw,self.hsw,self.lsw,self.asw,rho_air,v_car)
         lcg = self.lc
         lf = 0.5
-        return abs(2*Ffsp*lf + 2*Frsp*lf + downForceRearWing*(lcg - self.lrw) - downForceFrontWing*(lcg-self.lfw) - 2*downForceSideWing*(lcg-self.lsw))
+        return (2*Ffsp*lf + 2*Frsp*lf + downForceRearWing*(lcg - self.lrw) - downForceFrontWing*(lcg-self.lfw) - 2*downForceSideWing*(lcg-self.lsw))
     
     # objectives (0th is weighted global objective, 1th to 11th are sub - objectives)
     def objectives(self, weights):
