@@ -99,7 +99,7 @@ class car:
         self.vector.append(self.suspension)
         
         # continuous parameters with variable bounds
-        setattr(self, 'wrw', uniform(0.3, r_track - 2 * self.rrt))
+        setattr(self, 'wrw', uniform(0.3, 3 - 2 * self.rrt))
         setattr(self, 'yrw', uniform(.5 + self.hrw / 2, 1.2 - self.hrw / 2))
         setattr(self, 'yfw', uniform(0.03 + self.hfw / 2, .25 - self.hfw/2))
         setattr(self, 'ysw', uniform(0.03 + self.hsw/2, .250 - self.hsw/2))
