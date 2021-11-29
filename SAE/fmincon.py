@@ -195,7 +195,7 @@ class car:
         total_resistance = self.F_drag_total() + self.rollingResistance(tirePressure,v_car)
 
         w_wheels = v_car / self.rrt
-        efficiency = total_resistance * v_car / self.Phi_e
+        efficiency = 1
         torque = self.T_e
     
         F_wheels = torque * efficiency * w_e /(self.rrt * w_wheels)
