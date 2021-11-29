@@ -199,7 +199,10 @@ class car:
         torque = self.T_e
     
         F_wheels = torque * efficiency * w_e /(self.rrt * w_wheels)
-
+     
+        if (F_wheels<total_resistance):
+            return 0
+     
         return (F_wheels - total_resistance) / mTotal
     
     # objective 6 - crash force (minimize)
