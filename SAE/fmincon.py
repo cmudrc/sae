@@ -327,53 +327,53 @@ class car:
             pen2.append((self.wrw-0.3)**2)
         else:
             pen2.append(0)
-        if (self.wrw > r_track - 2 * self.rrt):
-            pen2.append((self.wrw > r_track - 2 * self.rrt)**2)
+        if (self.wrw > 3 - 2 * self.rrt):
+            pen2.append((self.wrw > 3 - 2 * self.rrt)**2)
         else:
             pen2.append(0)
         
         if(self.yrw < .5 + self.hrw / 2):
-            pen2.append((self.yrw - .5 + self.hrw / 2)**2)
+            pen2.append((self.yrw - .5 - self.hrw / 2)**2)
         else:
             pen2.append(0) 
         if(self.yrw > 1.2 - self.hrw / 2):
-            pen2.append((self.yrw - 1.2 - self.hrw / 2)**2)
+            pen2.append((self.yrw - 1.2 + self.hrw / 2)**2)
         else:
             pen2.append(0)
             
         if(self.yfw < 0.03 + self.hfw / 2):
-            pen2.append((self.yfw - 0.03 + self.hfw / 2)**2)
+            pen2.append((self.yfw - 0.03 - self.hfw / 2)**2)
         else:
             pen2.append(0)
         if(self.yfw > .25 - self.hfw/2):
-            pen2.append((self.yfw - .25 - self.hfw/2)**2)
+            pen2.append((self.yfw - .25 + self.hfw/2)**2)
         else:
             pen2.append(0)
             
         if(self.ysw < 0.03 + self.hsw/2):
-            pen2.append((self.ysw - 0.03 + self.hsw/2)**2)
+            pen2.append((self.ysw - 0.03 - self.hsw/2)**2)
         else:
             pen2.append(0)
         if(self.ysw > .250 - self.hsw/2):
-            pen2.append((self.ysw - .250 - self.hsw/2)**2)
+            pen2.append((self.ysw - .250 + self.hsw/2)**2)
         else:
             pen2.append(0)
             
         if(self.ye < 0.03 + self.he / 2):
-            pen2.append((self.ye - 0.03 + self.he / 2)**2)
+            pen2.append((self.ye - 0.03 - self.he / 2)**2)
         else:
             pen2.append(0)
         if(self.ye > .5 - self.he / 2):
-            pen2.append((self.ye - .5 - self.he / 2)**2)
+            pen2.append((self.ye - .5 + self.he / 2)**2)
         else:
             pen2.append(0)
             
         if(self.yc < 0.03 + self.hc / 2):
-            pen2.append((self.yc - 0.03 + self.hc / 2)**2)
+            pen2.append((self.yc - 0.03 - self.hc / 2)**2)
         else:
             pen2.append(0)
         if(self.yc > 1.200 - self.hc / 2):
-            pen2.append((self.yc - 1.200 - self.hc / 2)**2)
+            pen2.append((self.yc - 1.200 + self.hc / 2)**2)
         else:
             pen2.append(0)
             
@@ -382,16 +382,16 @@ class car:
         else:
             pen2.append(0)
         if(self.lia > .7  - self.lfw):
-            pen2.append((self.lia - .7  - self.lfw)**2)
+            pen2.append((self.lia - .7  + self.lfw)**2)
         else:
             pen2.append(0)
 
         if(self.yia < 0.03 + self.hia / 2):
-            pen2.append((self.yia - 0.03 + self.hia / 2)**2)
+            pen2.append((self.yia - 0.03 - self.hia / 2)**2)
         else:
             pen2.append(0)
         if(self.yia > 1.200 - self.hia / 2):
-            pen2.append((self.yia - 1.200 - self.hia / 2)**2)
+            pen2.append((self.yia - 1.200 + self.hia / 2)**2)
         else:
             pen2.append(0)
             
@@ -423,8 +423,14 @@ class car:
             pen3.append((self.F_down_total()+self.mass()*gravity-2*self.suspensionForce(self.kfsp,self.cfsp)-2*self.suspensionForce(self.krsp,self.crsp))**2)
         else:
             pen3.append(0)
-                  
+        
+        if (self.pitchMoment()<0):
+            pen3.append(self.pitchMoment()**2)
+        else:
+            pen3.append(0)
+            
         return(array(pen3))
+        
         
     def set_param(self,i,val):
         self.vector[i]=val
