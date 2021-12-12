@@ -55,7 +55,7 @@ class car:
             temp = randint(0,12)
             setattr(self, params.at[19+i, 'variable'], materials.at[temp,'q'])
             self.vector.append(temp)
-        setattr(self, 'Eia', self.qia*1000000)  
+        setattr(self, 'Eia', materials.at[temp,'E'])
         
         # rear tires
         setattr(self, 'rear_tire', randint(0,6))
@@ -440,7 +440,7 @@ class car:
         elif (i<24):
             setattr(self, params.at[i, 'variable'], materials.at[val,'q'])
             if (i == 23):
-                setattr(self, 'Eia', self.qia*1000000)
+                setattr(self, 'Eia', materials.at[val,'E'])
         elif (i == 24):
             setattr(self, params.at[25, 'variable'], tires.at[val,'radius'])
             setattr(self, params.at[26, 'variable'], tires.at[val,'mass'])
