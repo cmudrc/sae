@@ -13,5 +13,4 @@ setup(
     packages=['sae'],
     package_dir={'sae': 'src'},
     include_package_data=True,
-    package_data={'sae': ['src/resources/*']},
 )
