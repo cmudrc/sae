@@ -336,11 +336,11 @@ class car:
     def constraints_lin_ineq(self):
         pen2 = []
 
-        if (self.wrw < 0.3):
+        if self.wrw < 0.3:
             pen2.append((self.wrw - 0.3) ** 2)
         else:
             pen2.append(0)
-        if (self.wrw > 3 - 2 * self.rrt):
+        if self.wrw > 3 - 2 * self.rrt:
             pen2.append((self.wrw > 3 - 2 * self.rrt) ** 2)
         else:
             pen2.append(0)
