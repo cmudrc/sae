@@ -442,42 +442,42 @@ class car:
         else:
             pen3.append(0)
 
-        if (self.pitchMoment() < 0):
+        if self.pitchMoment() < 0:
             pen3.append(self.pitchMoment() ** 2)
         else:
             pen3.append(0)
 
-        return (array(pen3))
+        return array(pen3)
 
     def set_param(self, i, val):
         self.vector[i] = val
 
-        if (i < 19):
+        if i < 19:
             setattr(self, params.at[i, 'variable'], val)
-        elif (i < 24):
+        elif i < 24:
             setattr(self, params.at[i, 'variable'], materials.at[val, 'q'])
-            if (i == 23):
+            if i == 23:
                 setattr(self, 'Eia', materials.at[val, 'E'])
-        elif (i == 24):
+        elif i == 24:
             setattr(self, params.at[25, 'variable'], tires.at[val, 'radius'])
             setattr(self, params.at[26, 'variable'], tires.at[val, 'mass'])
-        elif (i == 25):
+        elif i == 25:
             setattr(self, params.at[27, 'variable'], tires.at[val, 'radius'])
             setattr(self, params.at[28, 'variable'], tires.at[val, 'mass'])
-        elif (i == 26):
+        elif i == 26:
             setattr(self, params.at[29, 'variable'], motors.at[val, 'Power'])
             setattr(self, params.at[30, 'variable'], motors.at[val, 'Length'])
             setattr(self, params.at[31, 'variable'], motors.at[val, 'Height'])
             setattr(self, params.at[32, 'variable'], motors.at[val, 'Torque'])
             setattr(self, params.at[33, 'variable'], motors.at[val, 'Mass'])
-        elif (i == 27):
+        elif i == 27:
             setattr(self, params.at[34, 'variable'], brakes.at[val, 'rbrk'])
             setattr(self, params.at[35, 'variable'], brakes.at[val, 'qbrk'])
             setattr(self, params.at[36, 'variable'], brakes.at[val, 'lbrk'])
             setattr(self, params.at[37, 'variable'], brakes.at[val, 'hbrk'])
             setattr(self, params.at[38, 'variable'], brakes.at[val, 'wbrk'])
             setattr(self, params.at[39, 'variable'], brakes.at[val, 'tbrk'])
-        elif (i == 28):
+        elif i == 28:
             setattr(self, params.at[40, 'variable'], suspension.at[val, 'krsp'])
             setattr(self, params.at[41, 'variable'], suspension.at[val, 'crsp'])
             setattr(self, params.at[42, 'variable'], suspension.at[val, 'mrsp'])
@@ -492,15 +492,15 @@ class car:
             self.set_param(i, vec[i])
 
     def get_param(self, i):
-        return (self.vector[i])
+        return self.vector[i]
 
     def get_vec(self):
-        return (self.vector)
+        return self.vector
 
 
 # generates cars until constraints_nonlin_ineq satisfied
 def generate_feasible():
-    while (True):
+    while True:
         feasible_car = car()
-        if (sum(feasible_car.constraints_nonlin_ineq()) == 0):
-            return (feasible_car)
+        if sum(feasible_car.constraints_nonlin_ineq()) == 0:
+            return feasible_car
