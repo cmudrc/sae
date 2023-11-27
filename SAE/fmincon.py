@@ -504,3 +504,5 @@ def generate_feasible():
         feasible_car = car()
         if sum(feasible_car.constraints_nonlin_ineq()) == 0:
             return feasible_car
+
+
