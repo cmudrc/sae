@@ -42,6 +42,5 @@ class TestOptimization(unittest.TestCase):
                 {'type': 'ineq', 'fun': penalty_2},
                 {'type': 'ineq', 'fun': penalty_3}
              ),
-            callback=callbackF
         )
         print(res)
