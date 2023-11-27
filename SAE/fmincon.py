@@ -286,7 +286,7 @@ class car:
         objs = nan * ones(11)
         objs_physical_vals = nan * ones(11)
 
-        if (with_subobjs == True):
+        if with_subobjs == True:
 
             for i in range(11):
                 objs[i] = all_objectives[i]()
@@ -294,13 +294,13 @@ class car:
 
         else:
             for i in range(11):
-                if (weights[i] != 0):
+                if weights[i] != 0:
                     objs[i] = all_objectives[i]()
 
         for i in range(11):
-            if (weights[i] != 0):
+            if weights[i] != 0:
 
-                if (i != 3 and i != 4 and i != 7):
+                if i != 3 and i != 4 and i != 7:
                     objs[i] = all_objectives[i]()
                     objs[i] = (objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
 
@@ -310,26 +310,26 @@ class car:
 
         global_obj = nansum(objs * weights)
 
-        if (with_subobjs):
-            if (tominimize_and_scaled):
-                return (global_obj, objs)
+        if with_subobjs:
+            if tominimize_and_scaled:
+                return global_obj, objs
             else:
-                return (global_obj, objs_physical_vals)
+                return global_obj, objs_physical_vals
         else:
-            return (global_obj)
+            return global_obj
 
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
     def constraints_bound(self):
         pen1 = []
 
         for i in range(19):
-            if (getattr(self, params.at[i, 'variable']) < params.at[i, 'min']):
+            if getattr(self, params.at[i, 'variable']) < params.at[i, 'min']:
                 pen1.append((getattr(self, params.at[i, 'variable']) - params.at[i, 'min']) ** 2)
-            elif (getattr(self, params.at[i, 'variable']) > params.at[i, 'max']):
+            elif getattr(self, params.at[i, 'variable']) > params.at[i, 'max']:
                 pen1.append((getattr(self, params.at[i, 'variable']) - params.at[i, 'max']) ** 2)
             else:
                 pen1.append(0)
-        return (array(pen1))
+        return array(pen1)
 
     # calculates penalty for violating constraints of the type A.{parameters} < b, where A is a matrix and b is a vector
     # both bounds are checked in case lower bound > upper bound
@@ -345,88 +345,88 @@ class car:
         else:
             pen2.append(0)
 
-        if (self.yrw < .5 + self.hrw / 2):
+        if self.yrw < .5 + self.hrw / 2:
             pen2.append((self.yrw - .5 - self.hrw / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.yrw > 1.2 - self.hrw / 2):
+        if self.yrw > 1.2 - self.hrw / 2:
             pen2.append((self.yrw - 1.2 + self.hrw / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.yfw < 0.03 + self.hfw / 2):
+        if self.yfw < 0.03 + self.hfw / 2:
             pen2.append((self.yfw - 0.03 - self.hfw / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.yfw > .25 - self.hfw / 2):
+        if self.yfw > .25 - self.hfw / 2:
             pen2.append((self.yfw - .25 + self.hfw / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.ysw < 0.03 + self.hsw / 2):
+        if self.ysw < 0.03 + self.hsw / 2:
             pen2.append((self.ysw - 0.03 - self.hsw / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.ysw > .250 - self.hsw / 2):
+        if self.ysw > .250 - self.hsw / 2:
             pen2.append((self.ysw - .250 + self.hsw / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.ye < 0.03 + self.he / 2):
+        if self.ye < 0.03 + self.he / 2:
             pen2.append((self.ye - 0.03 - self.he / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.ye > .5 - self.he / 2):
+        if self.ye > .5 - self.he / 2:
             pen2.append((self.ye - .5 + self.he / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.yc < 0.03 + self.hc / 2):
+        if self.yc < 0.03 + self.hc / 2:
             pen2.append((self.yc - 0.03 - self.hc / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.yc > 1.200 - self.hc / 2):
+        if self.yc > 1.200 - self.hc / 2:
             pen2.append((self.yc - 1.200 + self.hc / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.lia < 0.2):
+        if self.lia < 0.2:
             pen2.append((self.lia - 0.2) ** 2)
         else:
             pen2.append(0)
-        if (self.lia > .7 - self.lfw):
+        if self.lia > .7 - self.lfw:
             pen2.append((self.lia - .7 + self.lfw) ** 2)
         else:
             pen2.append(0)
 
-        if (self.yia < 0.03 + self.hia / 2):
+        if self.yia < 0.03 + self.hia / 2:
             pen2.append((self.yia - 0.03 - self.hia / 2) ** 2)
         else:
             pen2.append(0)
-        if (self.yia > 1.200 - self.hia / 2):
+        if self.yia > 1.200 - self.hia / 2:
             pen2.append((self.yia - 1.200 + self.hia / 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.yrsp < self.rrt):
+        if self.yrsp < self.rrt:
             pen2.append((self.yrsp - self.rrt) ** 2)
         else:
             pen2.append(0)
-        if (self.yrsp > self.rrt * 2):
+        if self.yrsp > self.rrt * 2:
             pen2.append((self.yrsp - self.rrt * 2) ** 2)
         else:
             pen2.append(0)
 
-        if (self.yfsp < self.rft):
+        if self.yfsp < self.rft:
             pen2.append((self.yfsp - self.rft) ** 2)
         else:
             pen2.append(0)
-        if (self.yfsp > self.rft * 2):
+        if self.yfsp > self.rft * 2:
             pen2.append((self.yfsp - self.rft * 2) ** 2)
         else:
             pen2.append(0)
 
-        return (array(pen2))
+        return array(pen2)
 
         # calculates penalty for violating constraints of the type f{parameters} < 0
 
