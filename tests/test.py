@@ -8,7 +8,7 @@ class TestOptimization(unittest.TestCase):
     def test_fmincon(self):
 
         def round_x(x):
-            for i in range(19, len(x)):
+            for i in range(19, 29):
                 rounded = round(x[i])
                 x[i] = rounded
             return x
@@ -33,7 +33,7 @@ class TestOptimization(unittest.TestCase):
             c.set_vec(round_x(x))
             return c.constraints_lin_ineq()
 
-        scipy.optimize.minimize(
+        res = scipy.optimize.minimize(
             objective,
             generate_feasible().vector,
             method='trust-constr',
@@ -41,5 +41,7 @@ class TestOptimization(unittest.TestCase):
                 {'type': 'ineq', 'fun': penalty_1},
                 {'type': 'ineq', 'fun': penalty_2},
                 {'type': 'ineq', 'fun': penalty_3}
-             )
+             ),
+            callback=callbackF
         )
+        print(res)
