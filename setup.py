@@ -11,6 +11,5 @@ setup(
     url='',
     install_requires=["numpy", "scipy", "pandas", "openpyxl"],
     packages=find_packages(), #['sae']
-    package_dir={'sae': 'src'},
     include_package_data=True,
 )
