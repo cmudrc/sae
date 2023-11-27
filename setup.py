@@ -10,6 +10,6 @@ setup(
     author_email='ask-drc@andrew.cmu.edu',
     url='',
     install_requires=["numpy", "scipy", "pandas", "openpyxl"],
-    packages=['sae'],
+    packages=['sae', 'resources'],
     package_dir={'sae': 'src'},
 )
