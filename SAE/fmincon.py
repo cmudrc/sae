@@ -1,19 +1,19 @@
 # import modules
 from numpy import array, ones, pi, cos, sqrt, nan, nansum
-from pandas import read_csv, read_excel
+from pandas import read_csv, read_excel, DataFrame
 from random import uniform, randint
 from os.path import dirname
 
 # directory path
-SAEdir = dirname(__file__)
+SAEdir: str = dirname(__file__)
 
 # read data into dataframes
-params=read_excel(SAEdir+"\\resources\\params.xlsx", engine='openpyxl')
-materials=read_csv(SAEdir+"\\resources\\materials.csv")
-tires=read_csv(SAEdir+"\\resources\\tires.csv")
-motors=read_csv(SAEdir+"\\resources\\motors.csv")
-brakes=read_csv(SAEdir+"\\resources\\brakes.csv")
-suspension=read_csv(SAEdir+"\\resources\\suspension.csv")
+params: DataFrame = read_excel(SAEdir + "/resources/params.xlsx", engine='openpyxl')
+materials: DataFrame = read_csv(SAEdir + "/resources/materials.csv")
+tires: DataFrame = read_csv(SAEdir + "/resources/tires.csv")
+motors: DataFrame = read_csv(SAEdir + "/resources/motors.csv")
+brakes: DataFrame = read_csv(SAEdir + "/resources/brakes.csv")
+suspension: DataFrame = read_csv(SAEdir + "/resources/suspension.csv")
 
 # constants
 v_car: float = 26.8  # m/s
