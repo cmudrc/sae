@@ -1,0 +1,23 @@
+name: tests
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: pip install -r requirements.txt
+      - name: install testing framework
+        run: pip install nose2
+      - name: run tests
+        run: nose2
