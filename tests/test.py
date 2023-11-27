@@ -1,6 +1,6 @@
 import unittest
 import scipy.optimize
-from SAE.fmincon import car, weightsNull, generate_feasible
+from src import car, weightsNull, generate_feasible
 
 
 class TestOptimization(unittest.TestCase):

@@ -53,7 +53,7 @@ class car:
             self.vector.append(temp)
 
         # integer parameters
-        # materials   
+        # materials
         for i in range(5):
             temp = randint(0, 12)
             setattr(self, params.at[19 + i, 'variable'], materials.at[temp, 'q'])
@@ -256,7 +256,7 @@ class car:
         a_brk = Fy * C / mTotal + 4 * Tbrk / (self.rrt * mTotal)
         return (v_car ** 2 / (2 * a_brk))
 
-    # objective 10 - (minimize) 
+    # objective 10 - (minimize)
     def suspensionAcceleration(self):
         Ffsp = self.suspensionForce(self.kfsp, self.cfsp)
         Frsp = self.suspensionForce(self.krsp, self.crsp)
