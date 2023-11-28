@@ -1,11 +1,34 @@
 import unittest
 import scipy.optimize
-from sae import Car, weightsNull, generate_feasible
+from sae import Car, weightsNull, weights1, generate_feasible
+
+
+class BasicTest(unittest.TestCase):
+
+    def test_random_generation(self):
+        # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
+        test_car = Car()
+        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+
+        # evaluate constraint violation penalites (square penalty)
+        test_car.constraints_bound()
+        test_car.constraints_lin_ineq()
+        test_car.constraints_nonlin_ineq()
+
+    def test_feasible_generation(self):
+        # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
+        test_car = generate_feasible()
+        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+
+        # evaluate constraint violation penalites (square penalty)
+        test_car.constraints_bound()
+        test_car.constraints_lin_ineq()
+        test_car.constraints_nonlin_ineq()
 
 
 class TestOptimization(unittest.TestCase):
 
-    def test_fmincon(self):
+    def test_minimize(self):
 
         def round_x(x):
             for i in range(19, 29):
@@ -44,3 +67,4 @@ class TestOptimization(unittest.TestCase):
              ),
         )
         print(res)
+

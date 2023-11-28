@@ -117,171 +117,21 @@ class Car:
             temp = getattr(self, params.at[46 + i, 'variable'])
             self.vector.append(temp)
 
-    # mass of subsystems
-    def mrw(self):
-        return self.lrw * self.wrw * self.hrw * self.qrw
-
-    def mfw(self):
-        return self.lfw * self.wfw * self.hfw * self.qfw
-
-    def msw(self):
-        return self.lsw * self.wsw * self.hsw * self.qsw
-
-    def mia(self):
-        return self.lia * self.wia * self.hia * self.qia
-
-    def mc(self):
-        return 2 * (self.hc * self.lc * self.tc + self.hc * self.wc * self.tc + self.lc * self.hc * self.tc) * self.qc
-
-    def mbrk(self):
-        return self.lbrk * self.wbrk * self.hbrk * self.qbrk
-
-    # objective 1 - mass (minimize)
-    def mass(self):
-        mass = self.mrw() + self.mfw() + 2 * self.msw() + 2 * self.mrt + 2 * self.mft + self.me + self.mc() + self.mia() + 4 * self.mbrk() + 2 * self.mrsp + 2 * self.mfsp
-        return mass
-
-    # objective 2 - centre of gravity height (minimize)
-    def cGy(self):
-        t1 = (
-                         self.mrw() * self.yrw + self.mfw() * self.yfw + self.me * self.ye + self.mc() * self.yc + self.mia() * self.yia) / self.mass()
-        t2 = 2 * (
-                    self.msw() * self.ysw + self.mrt * self.rrt + self.mft * self.rft + self.mbrk() * self.rft + self.mrsp * self.yrsp + self.mfsp * self.yfsp) / self.mass()
-        return t1 + t2
-
-    # aspect ratio of wing
-    def AR(self, w, alpha, l):
-        return w * cos(alpha) / l
-
-    # lift co-effecient
-    def C_lift(self, AR, alpha):
-        return 2 * pi * (AR / (AR + 2)) * alpha
-
-    # drag co-efficient
-    def C_drag(self, C_lift, AR):
-        return C_lift ** 2 / (pi * AR)
-
-    # wing downforce
-    def F_down_wing(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.AR(w, alpha, l)
-        C_l = self.C_lift(wingAR, alpha)
-        return 0.5 * alpha * h * w * rho_air * (v_car ** 2) * C_l
-
-    # wing drag
-    def F_drag_wing(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.AR(w, alpha, l)
-        C_l = self.C_lift(wingAR, alpha)
-        C_d = self.C_drag(C_l, wingAR)
-        return self.F_drag(w, h, rho_air, v_car, C_d)
-
-    # drag
-    def F_drag(self, w, h, rho_air, v_car, C_d):
-        return 0.5 * w * h * rho_air * v_car ** 2 * C_d
-
-    # objective 3 - total drag (minimize)
-    def F_drag_total(self):
-        cabinDrag = self.F_drag(self.wc, self.hc, rho_air, v_car, C_dc)
-        rearWingDrag = self.F_drag_wing(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        frontWingDrag = self.F_drag_wing(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        sideWingDrag = self.F_drag_wing(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        return rearWingDrag + frontWingDrag + 2 * sideWingDrag + cabinDrag
-
-    # objective 4 - total downforce (maximize)
-    def F_down_total(self):
-        downForceRearWing = self.F_down_wing(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        downForceFrontWing = self.F_down_wing(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        downForceSideWing = self.F_down_wing(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        return downForceRearWing + downForceFrontWing + 2 * downForceSideWing
-
-    # rolling resistance
-    def rollingResistance(self, tirePressure, v_car):
-        C = .005 + 1 / tirePressure * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
-        return C * self.mass() * gravity
-
-    # objective 5 - acceleration (maximize)
-    def acceleration(self):
-        mTotal = self.mass()
-        tirePressure = self.Prt
-        total_resistance = self.F_drag_total() + self.rollingResistance(tirePressure, v_car)
-
-        w_wheels = v_car / self.rrt
-        efficiency = 1
-        torque = self.T_e
-
-        F_wheels = torque * efficiency * w_e / (self.rrt * w_wheels)
-
-        if (F_wheels < total_resistance):
-            return 0
-
-        return (F_wheels - total_resistance) / mTotal
-
-    # objective 6 - crash force (minimize)
-    def crashForce(self):
-        return sqrt(self.mass() * v_car ** 2 * self.wia * self.hia * self.Eia / (2 * self.lia))
-
-    # objective 7 - impact attenuator volume (minimize)
-    def iaVolume(self):
-        return self.lia * self.wia * self.hia
-
-    def suspensionForce(self, k, c):
-        return k * y_suspension + c * dydt_suspension
-
-    # objective 8 - corner velocity in skid pad (maximize)
-    def cornerVelocity(self):
-        F_fsp = self.suspensionForce(self.kfsp, self.cfsp)
-        F_rsp = self.suspensionForce(self.krsp, self.crsp)
-        downforce = self.F_down_total()
-        mTotal = self.mass()
-
-        Clat = 1.6
-        forces = downforce + mTotal * gravity - 2 * F_fsp - 2 * F_rsp
-        if forces < 0:
-            return 0
-        return sqrt(forces * Clat * r_track / mTotal)
-
-    # objective 9 - (minimize)
-    def breakingDistance(self):
-        mTotal = self.mass()
-        C = .005 + 1 / self.Prt * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
-
-        A_brk = self.hbrk * self.wbrk
-        c_brk = .37
-        Tbrk = 2 * c_brk * P_brk * A_brk * self.rbrk
-
-        # y forces:
-        F_fsp = self.suspensionForce(self.kfsp, self.cfsp)
-        F_rsp = self.suspensionForce(self.krsp, self.crsp)
-        Fy = mTotal * gravity + self.F_down_total() - 2 * F_rsp - 2 * F_fsp
-        if Fy <= 0: Fy = 1E-10
-        a_brk = Fy * C / mTotal + 4 * Tbrk / (self.rrt * mTotal)
-        return (v_car ** 2 / (2 * a_brk))
-
-    # objective 10 - (minimize)
-    def suspensionAcceleration(self):
-        Ffsp = self.suspensionForce(self.kfsp, self.cfsp)
-        Frsp = self.suspensionForce(self.krsp, self.crsp)
-        mTotal = self.mass()
-        Fd = self.F_down_total()
-        return -(2 * Ffsp - 2 * Frsp - mTotal * gravity - Fd) / mTotal
-
-    # objective 11 - (minimize)
-    def pitchMoment(self):
-        Ffsp = self.suspensionForce(self.kfsp, self.cfsp)
-        Frsp = self.suspensionForce(self.krsp, self.crsp)
-        downForceRearWing = self.F_down_wing(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        downForceFrontWing = self.F_down_wing(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        downForceSideWing = self.F_down_wing(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        lcg = self.lc
-        lf = 0.5
-        return (2 * Ffsp * lf + 2 * Frsp * lf + downForceRearWing * (lcg - self.lrw) - downForceFrontWing * (
-                    lcg - self.lfw) - 2 * downForceSideWing * (lcg - self.lsw))
-
     # objectives
     def objectives(self, weights, with_subobjs=True, tominimize_and_scaled=True):
 
-        all_objectives = [self.mass, self.cGy, self.F_drag_total, self.F_down_total, self.acceleration, self.crashForce,
-                          self.iaVolume, self.cornerVelocity, self.breakingDistance, self.suspensionAcceleration,
-                          self.pitchMoment]
+        all_objectives = [
+            self._mass, self._height_of_center_of_gravity,
+            self._total_drag_force,
+            self._total_down_force,
+            self._acceleration,
+            self._crash_force,
+            self._impact_attenuator_volume,
+            self._corner_velocity,
+            self._breaking_distance,
+            self._suspension_acceleration,
+            self._pitch_moment
+        ]
 
         objs = nan * ones(11)
         objs_physical_vals = nan * ones(11)
@@ -433,17 +283,17 @@ class Car:
     def constraints_nonlin_ineq(self):
         pen3 = []
 
-        if (self.F_down_total() + self.mass() * gravity - 2 * self.suspensionForce(self.kfsp,
-                                                                                   self.cfsp) - 2 * self.suspensionForce(
+        if (self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
+                                                                                            self.cfsp) - 2 * self.__suspension_force(
                 self.krsp, self.crsp) < 0):
-            pen3.append((self.F_down_total() + self.mass() * gravity - 2 * self.suspensionForce(self.kfsp,
-                                                                                                self.cfsp) - 2 * self.suspensionForce(
+            pen3.append((self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
+                                                                                                         self.cfsp) - 2 * self.__suspension_force(
                 self.krsp, self.crsp)) ** 2)
         else:
             pen3.append(0)
 
-        if self.pitchMoment() < 0:
-            pen3.append(self.pitchMoment() ** 2)
+        if self._pitch_moment() < 0:
+            pen3.append(self._pitch_moment() ** 2)
         else:
             pen3.append(0)
 
@@ -496,6 +346,169 @@ class Car:
 
     def get_vec(self):
         return self.vector
+
+    # objective 1 - mass (minimize)
+    def _mass(self):
+        mass = self.__rear_wing_mass() + self.__front_wing_mass() + 2 * self.__side_wing_mass() + 2 * self.mrt + 2 * self.mft + self.me + self.__mc() + self.__impact_attenuator_mass() + 4 * self.__mbrk() + 2 * self.mrsp + 2 * self.mfsp
+        return mass
+
+    # objective 2 - centre of gravity height (minimize)
+    def _height_of_center_of_gravity(self):
+        t1 = (self.__rear_wing_mass() * self.yrw
+              + self.__front_wing_mass() * self.yfw
+              + self.me * self.ye
+              + self.__mc() * self.yc
+              + self.__impact_attenuator_mass() * self.yia) / self._mass()
+        t2 = 2 * (self.__side_wing_mass() * self.ysw
+                  + self.mrt * self.rrt
+                  + self.mft * self.rft
+                  + self.__mbrk() * self.rft
+                  + self.mrsp * self.yrsp
+                  + self.mfsp * self.yfsp) / self._mass()
+        return t1 + t2
+
+    # objective 3 - total drag (minimize)
+    def _total_drag_force(self):
+        cabin_drag = self.__drag_force(self.wc, self.hc, rho_air, v_car, C_dc)
+        rear_wing_drag = self.__wing_drag_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+        front_wing_drag = self.__wing_drag_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+        side_wing_drag = self.__wing_drag_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
+        return rear_wing_drag + front_wing_drag + 2 * side_wing_drag + cabin_drag
+
+    # objective 4 - total downforce (maximize)
+    def _total_down_force(self):
+        down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+        down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+        down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
+        return down_force_rear_wing + down_force_front_wing + 2 * down_force_side_wing
+
+    # objective 5 - acceleration (maximize)
+    def _acceleration(self):
+        total_resistance = self._total_drag_force() + self.__rolling_resistance(self.Prt, v_car)
+
+        w_wheels = v_car / self.rrt
+        efficiency = 1
+        torque = self.T_e
+
+        F_wheels = torque * efficiency * w_e / (self.rrt * w_wheels)
+
+        if F_wheels < total_resistance:
+            return 0
+
+        return (F_wheels - total_resistance) / self._mass()
+
+    # objective 6 - crash force (minimize)
+    def _crash_force(self):
+        return sqrt(self._mass() * v_car ** 2 * self.wia * self.hia * self.Eia / (2 * self.lia))
+
+    # objective 7 - impact attenuator volume (minimize)
+    def _impact_attenuator_volume(self):
+        return self.lia * self.wia * self.hia
+
+    # objective 8 - corner velocity in skid pad (maximize)
+    def _corner_velocity(self):
+        F_fsp = self.__suspension_force(self.kfsp, self.cfsp)
+        F_rsp = self.__suspension_force(self.krsp, self.crsp)
+        downforce = self._total_down_force()
+        total_mass = self._mass()
+
+        Clat = 1.6
+        forces = downforce + total_mass * gravity - 2 * F_fsp - 2 * F_rsp
+        if forces < 0:
+            return 0
+        return sqrt(forces * Clat * r_track / total_mass)
+
+    # objective 9 - (minimize)
+    def _breaking_distance(self):
+        total_mass = self._mass()
+        C = .005 + 1 / self.Prt * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
+
+        A_brk = self.hbrk * self.wbrk
+        c_brk = .37
+        Tbrk = 2 * c_brk * P_brk * A_brk * self.rbrk
+
+        # y forces:
+        F_fsp = self.__suspension_force(self.kfsp, self.cfsp)
+        F_rsp = self.__suspension_force(self.krsp, self.crsp)
+        Fy = total_mass * gravity + self._total_down_force() - 2 * F_rsp - 2 * F_fsp
+        if Fy <= 0: Fy = 1E-10
+        a_brk = Fy * C / total_mass + 4 * Tbrk / (self.rrt * total_mass)
+        return v_car ** 2 / (2 * a_brk)
+
+    # objective 10 - (minimize)
+    def _suspension_acceleration(self):
+        Ffsp = self.__suspension_force(self.kfsp, self.cfsp)
+        Frsp = self.__suspension_force(self.krsp, self.crsp)
+        total_mass = self._mass()
+        return -(2 * Ffsp - 2 * Frsp - total_mass * gravity - self._total_down_force()) / total_mass
+
+    # objective 11 - (minimize)
+    def _pitch_moment(self):
+        Ffsp = self.__suspension_force(self.kfsp, self.cfsp)
+        Frsp = self.__suspension_force(self.krsp, self.crsp)
+        down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+        down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+        down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
+        lcg = self.lc
+        lf = 0.5
+        return (2 * Ffsp * lf + 2 * Frsp * lf + down_force_rear_wing * (lcg - self.lrw) - down_force_front_wing * (
+                    lcg - self.lfw) - 2 * down_force_side_wing * (lcg - self.lsw))
+
+    # mass of subsystems
+    def __rear_wing_mass(self):
+        return self.lrw * self.wrw * self.hrw * self.qrw
+
+    def __front_wing_mass(self):
+        return self.lfw * self.wfw * self.hfw * self.qfw
+
+    def __side_wing_mass(self):
+        return self.lsw * self.wsw * self.hsw * self.qsw
+
+    def __impact_attenuator_mass(self):
+        return self.lia * self.wia * self.hia * self.qia
+
+    def __mc(self):
+        return 2 * (self.hc * self.lc * self.tc + self.hc * self.wc * self.tc + self.lc * self.hc * self.tc) * self.qc
+
+    def __mbrk(self):
+        return self.lbrk * self.wbrk * self.hbrk * self.qbrk
+
+    # rolling resistance
+    def __rolling_resistance(self, tire_pressure, v_car):
+        C = .005 + 1 / tire_pressure * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
+        return C * self._mass() * gravity
+
+    def __suspension_force(self, k, c):
+        return k * y_suspension + c * dydt_suspension
+
+    # aspect ratio of wing
+    def __wing_aspect_ratio(self, w, alpha, l):
+        return w * cos(alpha) / l
+
+    # lift co-effecient
+    def __lift_coefficient(self, AR, alpha):
+        return 2 * pi * (AR / (AR + 2)) * alpha
+
+    # drag co-efficient
+    def __drag_coefficient(self, C_lift, aspect_ratio):
+        return C_lift ** 2 / (pi * aspect_ratio)
+
+    # wing downforce
+    def __wing_down_force(self, w, h, l, alpha, rho_air, v_car):
+        wingAR = self.__wing_aspect_ratio(w, alpha, l)
+        C_l = self.__lift_coefficient(wingAR, alpha)
+        return 0.5 * alpha * h * w * rho_air * (v_car ** 2) * C_l
+
+    # wing drag
+    def __wing_drag_force(self, w, h, l, alpha, rho_air, v_car):
+        wingAR = self.__wing_aspect_ratio(w, alpha, l)
+        C_l = self.__lift_coefficient(wingAR, alpha)
+        C_d = self.__drag_coefficient(C_l, wingAR)
+        return self.__drag_force(w, h, rho_air, v_car, C_d)
+
+    # drag
+    def __drag_force(self, w, h, rho_air, v_car, C_d):
+        return 0.5 * w * h * rho_air * v_car ** 2 * C_d
 
 
 # generates cars until constraints_nonlin_ineq satisfied

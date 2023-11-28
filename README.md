@@ -9,8 +9,6 @@ A car is defined using a 39-dimensional vector of continuous and integer paramet
 
 ## Environment setup
 
-<!-- -->
-  
 SAE-fmincon has been tested with python 3.9.1. We recommend creating a new Anaconda environment and installing the requirements.
 
 ```bash
@@ -27,7 +25,7 @@ Run in your favorite python compiler:
 import sae
 
 # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
-test_car = sae.car()
+test_car = sae.Car()
 
 # generate a random car that satisfies all constraints
 test_car =sae.generate_feasible()
