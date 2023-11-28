@@ -5,7 +5,7 @@ SAE-fmincon is a Python library wherein the multi-objective formula SAE system d
 A car is defined using a 39-dimensional vector of continuous and integer parameters. The objective to be minimized is a weighted sum of 11 sub-objectives. The minimization is subject to 3 types of inequality constraints:
 1. Fixed bounds: lb ≤ x ≤ ub
 2. Linear inequalities: A*x ≤ b
-3. Non linear inqualities: c(x) ≤ 0
+3. Non linear inequalities: c(x) ≤ 0
 
 ## Environment setup
 
