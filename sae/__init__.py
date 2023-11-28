@@ -534,7 +534,7 @@ class COTSCar:
 
         # Fix some values at average of bounds
         for i in range(19):
-            temp = mean([params.at[i, 'min'], params.at[i, 'max']])
+            temp = mean([float(params.at[i, 'min']), float(params.at[i, 'max'])])
             self.car.set_param(i, temp)
 
         # first 5 entries are for materials
