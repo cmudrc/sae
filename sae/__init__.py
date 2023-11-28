@@ -348,9 +348,18 @@ class Car:
         return self.vector
 
     # objective 1 - mass (minimize)
-    def _mass(self):
-        mass = self.__rear_wing_mass() + self.__front_wing_mass() + 2 * self.__side_wing_mass() + 2 * self.mrt + 2 * self.mft + self.me + self.__mc() + self.__impact_attenuator_mass() + 4 * self.__mbrk() + 2 * self.mrsp + 2 * self.mfsp
-        return mass
+    def _mass(self) -> float:
+        return (self.__rear_wing_mass()
+                + self.__front_wing_mass()
+                + 2 * self.__side_wing_mass()
+                + 2 * self.mrt
+                + 2 * self.mft
+                + self.me
+                + self.__mc()
+                + self.__impact_attenuator_mass()
+                + 4 * self.__mbrk()
+                + 2 * self.mrsp
+                + 2 * self.mfsp)
 
     # objective 2 - centre of gravity height (minimize)
     def _height_of_center_of_gravity(self):
@@ -407,13 +416,12 @@ class Car:
 
     # objective 8 - corner velocity in skid pad (maximize)
     def _corner_velocity(self):
-        F_fsp = self.__suspension_force(self.kfsp, self.cfsp)
-        F_rsp = self.__suspension_force(self.krsp, self.crsp)
-        downforce = self._total_down_force()
-        total_mass = self._mass()
-
         Clat = 1.6
-        forces = downforce + total_mass * gravity - 2 * F_fsp - 2 * F_rsp
+        total_mass = self._mass()
+        forces = (self._total_down_force()
+                  + total_mass * gravity
+                  - 2 * self.__suspension_force(self.kfsp, self.cfsp)
+                  - 2 * self.__suspension_force(self.krsp, self.crsp))
         if forces < 0:
             return 0
         return sqrt(forces * Clat * r_track / total_mass)
@@ -437,10 +445,12 @@ class Car:
 
     # objective 10 - (minimize)
     def _suspension_acceleration(self):
-        Ffsp = self.__suspension_force(self.kfsp, self.cfsp)
-        Frsp = self.__suspension_force(self.krsp, self.crsp)
         total_mass = self._mass()
-        return -(2 * Ffsp - 2 * Frsp - total_mass * gravity - self._total_down_force()) / total_mass
+        return -(2 * self.__suspension_force(self.kfsp, self.cfsp)
+                 - 2 * self.__suspension_force(self.krsp, self.crsp)
+                 - total_mass * gravity
+                 - self._total_down_force()
+                 ) / total_mass
 
     # objective 11 - (minimize)
     def _pitch_moment(self):
@@ -474,23 +484,23 @@ class Car:
         return self.lbrk * self.wbrk * self.hbrk * self.qbrk
 
     # rolling resistance
-    def __rolling_resistance(self, tire_pressure, v_car):
-        C = .005 + 1 / tire_pressure * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
+    def __rolling_resistance(self, tire_pressure: float, car_velocity: float) -> float:
+        C = .005 + 1 / tire_pressure * (.01 + .0095 * ((car_velocity * 3.6 / 100) ** 2))
         return C * self._mass() * gravity
 
-    def __suspension_force(self, k, c):
+    def __suspension_force(self, k: float, c) -> float:
         return k * y_suspension + c * dydt_suspension
 
     # aspect ratio of wing
-    def __wing_aspect_ratio(self, w, alpha, l):
+    def __wing_aspect_ratio(self, w: float, alpha: float, l: float) -> float:
         return w * cos(alpha) / l
 
     # lift co-effecient
-    def __lift_coefficient(self, AR, alpha):
+    def __lift_coefficient(self, AR: float, alpha: float) -> float:
         return 2 * pi * (AR / (AR + 2)) * alpha
 
     # drag co-efficient
-    def __drag_coefficient(self, C_lift, aspect_ratio):
+    def __drag_coefficient(self, C_lift: float, aspect_ratio: float) -> float:
         return C_lift ** 2 / (pi * aspect_ratio)
 
     # wing downforce
@@ -507,12 +517,12 @@ class Car:
         return self.__drag_force(w, h, rho_air, v_car, C_d)
 
     # drag
-    def __drag_force(self, w, h, rho_air, v_car, C_d):
-        return 0.5 * w * h * rho_air * v_car ** 2 * C_d
+    def __drag_force(self, w, h, rho_air, car_velocity, drag_coefficient):
+        return 0.5 * w * h * rho_air * car_velocity ** 2 * drag_coefficient
 
 
 # generates cars until constraints_nonlin_ineq satisfied
-def generate_feasible():
+def generate_feasible() -> Car:
     while True:
         feasible_car = Car()
         if sum(feasible_car.constraints_nonlin_ineq()) == 0:
