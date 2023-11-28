@@ -1,6 +1,6 @@
-# SAE-fmincon
+# SAE
 
-SAE-fmincon is a Python library wherein the multi-objective formula SAE system design problem is modelled as a constrained minimization problem. It is based on the problem detailed in [Design of Complex Engineered Systems Using Multi-Agent Coordination](https://asmedigitalcollection.asme.org/computingengineering/article/18/1/011003/366472/Design-of-Complex-Engineered-Systems-Using-Multi) with minor modifications.
+SAE is a Python library wherein the multi-objective formula SAE system design problem is modelled as a constrained minimization problem. It is based on the problem detailed in [Design of Complex Engineered Systems Using Multi-Agent Coordination](https://asmedigitalcollection.asme.org/computingengineering/article/18/1/011003/366472/Design-of-Complex-Engineered-Systems-Using-Multi) with minor modifications.
 
 A car is defined using a 39-dimensional vector of continuous and integer parameters. The objective to be minimized is a weighted sum of 11 sub-objectives. The minimization is subject to 3 types of inequality constraints:
 1. Fixed bounds: lb ≤ x ≤ ub
@@ -9,7 +9,7 @@ A car is defined using a 39-dimensional vector of continuous and integer paramet
 
 ## Environment setup
 
-SAE-fmincon has been tested with python 3.9.1. We recommend creating a new Anaconda environment and installing the requirements.
+SAE has been tested with python 3.9.1. We recommend creating a new Anaconda environment and installing the requirements.
 
 ```bash
 conda create -n myEnvironment python=3.9.1
