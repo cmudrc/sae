@@ -5,34 +5,30 @@ SAE-fmincon is a Python library wherein the multi-objective formula SAE system d
 A car is defined using a 39-dimensional vector of continuous and integer parameters. The objective to be minimized is a weighted sum of 11 sub-objectives. The minimization is subject to 3 types of inequality constraints:
 1. Fixed bounds: lb ≤ x ≤ ub
 2. Linear inequalities: A*x ≤ b
-3. Non linear inqualities: c(x) ≤ 0
+3. Non linear inequalities: c(x) ≤ 0
 
 ## Environment setup
 
-<!-- -->
-  
 SAE-fmincon has been tested with python 3.9.1. We recommend creating a new Anaconda environment and installing the requirements.
 
 ```bash
 conda create -n myEnvironment python=3.9.1
 conda activate myEnvironment
 conda install pip
-pip install numpy==1.20.1
-pip install pandas==1.2.2
-pip install openpyxl==3.0.6
+pip install -r requirements.txt
 ```
 
 ## Usage
 Run in your favorite python compiler:
 
 ```python
-import SAE.fmincon
+import sae
 
 # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
-test_car = SAE.fmincon.car()
+test_car = sae.Car()
 
 # generate a random car that satisfies all constraints
-test_car = SAE.fmincon.generate_feasible()
+test_car =sae.generate_feasible()
 
 # get the 39-dimensional vector that defines the car
 # (0-18, and 29-38 are continuous parameters while 19-28 are integer parameters)
@@ -53,7 +49,7 @@ test_car.get_param(9)
 # meaningful values, if True the maximization sub-objectives are negated and all of them are scaled
 # (These are the values that are involved in composing the weighted objective)
 
-test_car.objectives(SAE.fmincon.weights1, with_subobjs=True, tominimize_and_scaled=True)
+test_car.objectives(sae.weights1, with_subobjs=True, tominimize_and_scaled=True)
 
 # set a parmeter value - 6th paramter as 0.5
 test_car.set_param(6, 0.5)
