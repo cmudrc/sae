@@ -39,7 +39,7 @@ weights2 = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
 weights3 = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
 
 
-class car:
+class Car:
     # generates a car that satisfies constraints_bound and constraints_lin_ineq
     def __init__(self):
 
@@ -501,7 +501,7 @@ class car:
 # generates cars until constraints_nonlin_ineq satisfied
 def generate_feasible():
     while True:
-        feasible_car = car()
+        feasible_car = Car()
         if sum(feasible_car.constraints_nonlin_ineq()) == 0:
             return feasible_car
 

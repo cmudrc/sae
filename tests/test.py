@@ -1,6 +1,6 @@
 import unittest
 import scipy.optimize
-from sae import car, weightsNull, generate_feasible
+from sae import Car, weightsNull, generate_feasible
 
 
 class TestOptimization(unittest.TestCase):
@@ -14,22 +14,22 @@ class TestOptimization(unittest.TestCase):
             return x
 
         def objective(x):
-            c = car()
+            c = Car()
             c.set_vec(round_x(x))
             return c.objectives(weightsNull, with_subobjs=False)
 
         def penalty_1(x):
-            c = car()
+            c = Car()
             c.set_vec(round_x(x))
             return c.constraints_bound()
 
         def penalty_2(x):
-            c = car()
+            c = Car()
             c.set_vec(round_x(x))
             return c.constraints_nonlin_ineq()
 
         def penalty_3(x):
-            c = car()
+            c = Car()
             c.set_vec(round_x(x))
             return c.constraints_lin_ineq()
 
