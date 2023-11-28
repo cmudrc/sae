@@ -1,6 +1,6 @@
 import unittest
 import scipy.optimize
-from sae import Car, weightsNull, weights1, generate_feasible
+from sae import COTSCar, Car, weightsNull, weights1, generate_feasible
 
 
 class BasicTest(unittest.TestCase):
@@ -18,6 +18,26 @@ class BasicTest(unittest.TestCase):
     def test_feasible_generation(self):
         # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
         test_car = generate_feasible()
+        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+
+        # evaluate constraint violation penalites (square penalty)
+        test_car.constraints_bound()
+        test_car.constraints_lin_ineq()
+        test_car.constraints_nonlin_ineq()
+
+    def test_random_generation_cots(self):
+        # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
+        test_car = COTSCar()
+        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+
+        # evaluate constraint violation penalites (square penalty)
+        test_car.constraints_bound()
+        test_car.constraints_lin_ineq()
+        test_car.constraints_nonlin_ineq()
+
+    def test_feasible_generation_cots(self):
+        # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
+        test_car = generate_feasible(cots=True)
         test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
 
         # evaluate constraint violation penalites (square penalty)

@@ -1,11 +1,12 @@
 # import modules
-from numpy import array, ones, pi, cos, sqrt, nan, nansum
+from numpy import array, ones, pi, cos, sqrt, nan, nansum, mean
 from pandas import read_csv, read_excel, DataFrame
 from random import uniform, randint
-from os.path import dirname
+import typing
+import os
 
 # directory path
-SAEdir: str = dirname(__file__)
+SAEdir: str = os.path.dirname(__file__)
 
 # read data into dataframes
 params: DataFrame = read_excel(SAEdir + "/resources/params.xlsx", engine='openpyxl')
@@ -118,7 +119,7 @@ class Car:
             self.vector.append(temp)
 
     # objectives
-    def objectives(self, weights, with_subobjs=True, tominimize_and_scaled=True):
+    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
 
         all_objectives = [
             self._mass, self._height_of_center_of_gravity,
@@ -521,11 +522,144 @@ class Car:
         return 0.5 * w * h * rho_air * car_velocity ** 2 * drag_coefficient
 
 
+class COTSCar:
+    # generates a car that satisfies constraints_bound and constraints_lin_ineq
+    def __init__(self):
+
+        self.car = Car()
+
+        # car vector with integer variables only
+        self.vector = []
+
+        # Fix some values at average of bounds
+        for i in range(19):
+            temp = mean([params.at[i, 'min'], params.at[i, 'max']])
+            self.car.set_param(i, temp)
+
+        # first 5 entries are for materials
+        for i in range(5):
+            temp = randint(0, 12)
+            setattr(self.car, params.at[19 + i, 'variable'], materials.at[temp, 'q'])
+            self.vector.append(temp)
+        setattr(self.car, 'Eia', materials.at[temp, 'E'])
+
+        # 6th entry is for rear tires
+        self.car.rear_tire = randint(0, 6)
+        setattr(self.car, params.at[25, 'variable'], tires.at[self.car.rear_tire, 'radius'])
+        setattr(self.car, params.at[26, 'variable'], tires.at[self.car.rear_tire, 'mass'])
+        self.vector.append(self.car.rear_tire)
+
+        # 7th entry is for front tires
+        self.car.front_tire = randint(0, 6)
+        setattr(self.car, params.at[27, 'variable'], tires.at[self.car.front_tire, 'radius'])
+        setattr(self.car, params.at[28, 'variable'], tires.at[self.car.front_tire, 'mass'])
+        self.vector.append(self.car.front_tire)
+
+        # 8th entry is engine choice
+        self.car.engine = randint(0, 20)
+        setattr(self.car, params.at[29, 'variable'], motors.at[self.car.engine, 'Power'])
+        setattr(self.car, params.at[30, 'variable'], motors.at[self.car.engine, 'Length'])
+        setattr(self.car, params.at[31, 'variable'], motors.at[self.car.engine, 'Height'])
+        setattr(self.car, params.at[32, 'variable'], motors.at[self.car.engine, 'Torque'])
+        setattr(self.car, params.at[33, 'variable'], motors.at[self.car.engine, 'Mass'])
+        self.vector.append(self.car.engine)
+
+        # 9th entry is brake choice
+        self.car.brakes = randint(0, 33)
+        setattr(self.car, params.at[34, 'variable'], brakes.at[self.car.brakes, 'rbrk'])
+        setattr(self.car, params.at[35, 'variable'], brakes.at[self.car.brakes, 'qbrk'])
+        setattr(self.car, params.at[36, 'variable'], brakes.at[self.car.brakes, 'lbrk'])
+        setattr(self.car, params.at[37, 'variable'], brakes.at[self.car.brakes, 'hbrk'])
+        setattr(self.car, params.at[38, 'variable'], brakes.at[self.car.brakes, 'wbrk'])
+        setattr(self.car, params.at[39, 'variable'], brakes.at[self.car.brakes, 'tbrk'])
+        self.vector.append(self.car.brakes)
+
+        # 10th entry is suspension choice
+        self.car.suspension = randint(0, 4)
+        setattr(self.car, params.at[40, 'variable'], suspension.at[self.car.suspension, 'krsp'])
+        setattr(self.car, params.at[41, 'variable'], suspension.at[self.car.suspension, 'crsp'])
+        setattr(self.car, params.at[42, 'variable'], suspension.at[self.car.suspension, 'mrsp'])
+        setattr(self.car, params.at[43, 'variable'], suspension.at[self.car.suspension, 'kfsp'])
+        setattr(self.car, params.at[44, 'variable'], suspension.at[self.car.suspension, 'cfsp'])
+        setattr(self.car, params.at[45, 'variable'], suspension.at[self.car.suspension, 'mfsp'])
+        self.vector.append(self.car.suspension)
+
+        # continuous parameters with variable bounds
+        setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
+        setattr(self.car, 'yrw', mean([0.5 + self.car.hrw / 2, 1.2 - self.car.hrw / 2]))
+        setattr(self.car, 'yfw', mean([0.03 + self.car.hfw / 2, .25 - self.car.hfw / 2]))
+        setattr(self.car, 'ysw', mean([0.03 + self.car.hsw / 2, .250 - self.car.hsw / 2]))
+        setattr(self.car, 'ye', mean([0.03 + self.car.he / 2, .5 - self.car.he / 2]))
+        setattr(self.car, 'yc', mean([0.03 + self.car.hc / 2, 1.200 - self.car.hc / 2]))
+        setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
+        setattr(self.car, 'yia', mean([0.03 + self.car.hia / 2, 1.200 - self.car.hia / 2]))
+        setattr(self.car, 'yrsp', mean([self.car.rrt, self.car.rrt * 2]))
+        setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
+
+    # objectives
+    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
+        return self.car.objectives(weights, with_subobjs=with_subobjs, tominimize_and_scaled=tominimize_and_scaled)
+
+    # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
+    def constraints_bound(self):
+        return self.car.constraints_bound()
+
+    # calculates penalty for violating constraints of the type A.{parameters} < b, where A is a matrix and b is a vector
+    # both bounds are checked in case lower bound > upper bound
+    def constraints_lin_ineq(self):
+        return self.car.constraints_lin_ineq()
+
+    def constraints_nonlin_ineq(self):
+        return self.car.constraints_nonlin_ineq()
+
+    def set_param(self, i, val):
+        self.vector[i] = val
+
+        if i < 5:
+            setattr(self, params.at[i, 'variable'], materials.at[val, 'q'])
+            if i == 4:
+                setattr(self, 'Eia', materials.at[val, 'E'])
+        elif i == 5:
+            setattr(self, params.at[25, 'variable'], tires.at[val, 'radius'])
+            setattr(self, params.at[26, 'variable'], tires.at[val, 'mass'])
+        elif i == 6:
+            setattr(self, params.at[27, 'variable'], tires.at[val, 'radius'])
+            setattr(self, params.at[28, 'variable'], tires.at[val, 'mass'])
+        elif i == 7:
+            setattr(self, params.at[29, 'variable'], motors.at[val, 'Power'])
+            setattr(self, params.at[30, 'variable'], motors.at[val, 'Length'])
+            setattr(self, params.at[31, 'variable'], motors.at[val, 'Height'])
+            setattr(self, params.at[32, 'variable'], motors.at[val, 'Torque'])
+            setattr(self, params.at[33, 'variable'], motors.at[val, 'Mass'])
+        elif i == 8:
+            setattr(self, params.at[34, 'variable'], brakes.at[val, 'rbrk'])
+            setattr(self, params.at[35, 'variable'], brakes.at[val, 'qbrk'])
+            setattr(self, params.at[36, 'variable'], brakes.at[val, 'lbrk'])
+            setattr(self, params.at[37, 'variable'], brakes.at[val, 'hbrk'])
+            setattr(self, params.at[38, 'variable'], brakes.at[val, 'wbrk'])
+            setattr(self, params.at[39, 'variable'], brakes.at[val, 'tbrk'])
+        elif i == 9:
+            setattr(self, params.at[40, 'variable'], suspension.at[val, 'krsp'])
+            setattr(self, params.at[41, 'variable'], suspension.at[val, 'crsp'])
+            setattr(self, params.at[42, 'variable'], suspension.at[val, 'mrsp'])
+            setattr(self, params.at[43, 'variable'], suspension.at[val, 'kfsp'])
+            setattr(self, params.at[44, 'variable'], suspension.at[val, 'cfsp'])
+            setattr(self, params.at[45, 'variable'], suspension.at[val, 'mfsp'])
+
+    def set_vec(self, vec):
+        for i in range(9):
+            self.set_param(i, vec[i])
+
+    def get_param(self, i):
+        return self.vector[i]
+
+    def get_vec(self):
+        return self.vector
+
+
 # generates cars until constraints_nonlin_ineq satisfied
-def generate_feasible() -> Car:
+def generate_feasible(cots: bool = False) -> typing.Union[Car, COTSCar]:
     while True:
-        feasible_car = Car()
+        feasible_car = COTSCar() if cots else Car()
         if sum(feasible_car.constraints_nonlin_ineq()) == 0:
             return feasible_car
-
-
