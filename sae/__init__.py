@@ -458,15 +458,18 @@ class Car:
 
     # objective 11 - (minimize)
     def _pitch_moment(self) -> float:
-        Ffsp = self.__suspension_force(self.kfsp, self.cfsp)
-        Frsp = self.__suspension_force(self.krsp, self.crsp)
+        front_suspension_force = self.__suspension_force(self.kfsp, self.cfsp)
+        rear_suspension_force = self.__suspension_force(self.krsp, self.crsp)
         down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
         down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
         down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
         lcg = self.lc
         lf = 0.5
-        return (2 * Ffsp * lf + 2 * Frsp * lf + down_force_rear_wing * (lcg - self.lrw) - down_force_front_wing * (
-                lcg - self.lfw) - 2 * down_force_side_wing * (lcg - self.lsw))
+        return (2 * front_suspension_force * lf
+                + 2 * rear_suspension_force * lf
+                + down_force_rear_wing * (lcg - self.lrw)
+                - down_force_front_wing * (lcg - self.lfw)
+                - 2 * down_force_side_wing * (lcg - self.lsw))
 
     # mass of subsystems
     def __rear_wing_mass(self) -> float:
