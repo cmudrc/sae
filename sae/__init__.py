@@ -16,6 +16,10 @@ tires: DataFrame = read_csv(SAEdir + "/resources/tires.csv")
 motors: DataFrame = read_csv(SAEdir + "/resources/motors.csv")
 brakes: DataFrame = read_csv(SAEdir + "/resources/brakes.csv")
 suspension: DataFrame = read_csv(SAEdir + "/resources/suspension.csv")
+attenuators: DataFrame = read_csv(SAEdir + "/resources/attenuators.csv")
+cabins: DataFrame = read_csv(SAEdir + "/resources/cabins.csv")
+pressure: DataFrame = read_csv(SAEdir + "/resources/pressure.csv")
+wings: DataFrame = read_csv(SAEdir + "/resources/wings.csv")
 
 # constants
 v_car: float = 26.8  # m/s
