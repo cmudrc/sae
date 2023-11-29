@@ -545,7 +545,7 @@ class COTSCar:
         self.vector = []
 
         # Fix some values at average of bounds
-        for i in range(19):
+        for i in range(13):
             temp = mean([float(params.at[i, 'min']), float(params.at[i, 'max'])])
             self.car.set_param(i, temp)
 
@@ -597,14 +597,61 @@ class COTSCar:
         setattr(self.car, params.at[45, 'variable'], suspension.at[self.car.suspension, 'mfsp'])
         self.vector.append(self.car.suspension)
 
+        # 11th entry is for impact attenuator choice
+        self.impact_attenuator = randint(0, attenuators.shape[0]-1)
+        self.car.hia = attenuators.at[self.impact_attenuator, 'height']
+        self.car.wia = attenuators.at[self.impact_attenuator, 'width']
+        self.car.lia = attenuators.at[self.impact_attenuator, 'length']
+        self.vector.append(self.impact_attenuator)
+
+        # 12th entry is for cabin choice
+        self.cabin = randint(0, cabins.shape[0]-1)
+        self.car.hc = cabins.at[self.cabin, 'height']
+        self.car.lc = cabins.at[self.cabin, 'width']
+        self.car.wc = cabins.at[self.cabin, 'length']
+        self.car.tc = cabins.at[self.cabin, 'thickness']
+        self.vector.append(self.cabin)
+
+        # 13th and 14th choices are for tire pressure rating
+        self.front_tire_pressure = randint(0, pressure.shape[0]-1)
+        self.car.Pft = pressure.at[self.front_tire_pressure, 'pressure']
+        self.vector.append(self.front_tire_pressure)
+        self.rear_tire_pressure = randint(0, pressure.shape[0]-1)
+        self.car.Prt = pressure.at[self.rear_tire_pressure, 'pressure']
+        self.vector.append(self.rear_tire_pressure)
+
+        # 15th choice is for rear wing
+        self.rear_wing = randint(0, wings.shape[0] - 1)
+        self.car.hrw = wings.at[self.rear_wing, 'height']
+        self.car.lrw = wings.at[self.rear_wing, 'length']
+        self.car.wrw = wings.at[self.rear_wing, 'width']
+        self.car.arw = wings.at[self.rear_wing, 'angle of attack']
+        self.vector.append(self.rear_wing)
+
+        # 16th choice is for front wing
+        self.front_wing = randint(0, wings.shape[0] - 1)
+        self.car.hfw = wings.at[self.front_wing, 'height']
+        self.car.lfw = wings.at[self.front_wing, 'length']
+        self.car.wfw = wings.at[self.front_wing, 'width']
+        self.car.afw = wings.at[self.front_wing, 'angle of attack']
+        self.vector.append(self.front_wing)
+
+        # 17th choice is for side wings
+        self.side_wing = randint(0, wings.shape[0] - 1)
+        self.car.hsw = wings.at[self.side_wing, 'height']
+        self.car.lsw = wings.at[self.side_wing, 'length']
+        self.car.wsw = wings.at[self.side_wing, 'width']
+        self.car.asw = wings.at[self.side_wing, 'angle of attack']
+        self.vector.append(self.side_wing)
+
         # continuous parameters with variable bounds
-        setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
+        # setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
         setattr(self.car, 'yrw', mean([0.5 + self.car.hrw / 2, 1.2 - self.car.hrw / 2]))
         setattr(self.car, 'yfw', mean([0.03 + self.car.hfw / 2, .25 - self.car.hfw / 2]))
         setattr(self.car, 'ysw', mean([0.03 + self.car.hsw / 2, .250 - self.car.hsw / 2]))
         setattr(self.car, 'ye', mean([0.03 + self.car.he / 2, .5 - self.car.he / 2]))
         setattr(self.car, 'yc', mean([0.03 + self.car.hc / 2, 1.200 - self.car.hc / 2]))
-        setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
+        # setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
         setattr(self.car, 'yia', mean([0.03 + self.car.hia / 2, 1.200 - self.car.hia / 2]))
         setattr(self.car, 'yrsp', mean([self.car.rrt, self.car.rrt * 2]))
         setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
@@ -663,21 +710,56 @@ class COTSCar:
             setattr(self, params.at[43, 'variable'], suspension.at[val, 'kfsp'])
             setattr(self, params.at[44, 'variable'], suspension.at[val, 'cfsp'])
             setattr(self, params.at[45, 'variable'], suspension.at[val, 'mfsp'])
+        elif i == 10:
+            self.impact_attenuator = val
+            self.car.hia = attenuators.at[val, 'height']
+            self.car.wia = attenuators.at[val, 'width']
+            self.car.lia = attenuators.at[val, 'length']
+        elif i == 11:
+            self.cabin = val
+            self.car.hc = attenuators.at[val, 'height']
+            self.car.lc = attenuators.at[val, 'width']
+            self.car.wc = attenuators.at[val, 'length']
+            self.car.tc = attenuators.at[val, 'thickness']
+        elif i == 12:
+            self.front_tire_pressure = val
+            self.car.Pft = pressure.at[val, 'pressure']
+        elif i == 13:
+            self.rear_tire_pressure = val
+            self.car.Prt = pressure.at[val, 'pressure']
+        elif i == 14:
+            self.rear_wing = val
+            self.car.hrw = wings.at[val, 'height']
+            self.car.lrw = wings.at[val, 'length']
+            self.car.wrw = wings.at[val, 'width']
+            self.car.arw = wings.at[val, 'angle of attack']
+        elif i == 15:
+            self.front_wing = val
+            self.car.hfw = wings.at[val, 'height']
+            self.car.lfw = wings.at[val, 'length']
+            self.car.wfw = wings.at[val, 'width']
+            self.car.afw = wings.at[val, 'angle of attack']
+        elif i == 16:
+            self.side_wing = val
+            self.car.hsw = wings.at[val, 'height']
+            self.car.lsw = wings.at[val, 'length']
+            self.car.wsw = wings.at[val, 'width']
+            self.car.asw = wings.at[val, 'angle of attack']
 
         # update continuous parameters with variable bounds since some bounds might have changed
-        setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
+        # setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
         setattr(self.car, 'yrw', mean([0.5 + self.car.hrw / 2, 1.2 - self.car.hrw / 2]))
         setattr(self.car, 'yfw', mean([0.03 + self.car.hfw / 2, .25 - self.car.hfw / 2]))
         setattr(self.car, 'ysw', mean([0.03 + self.car.hsw / 2, .250 - self.car.hsw / 2]))
         setattr(self.car, 'ye', mean([0.03 + self.car.he / 2, .5 - self.car.he / 2]))
         setattr(self.car, 'yc', mean([0.03 + self.car.hc / 2, 1.200 - self.car.hc / 2]))
-        setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
+        # setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
         setattr(self.car, 'yia', mean([0.03 + self.car.hia / 2, 1.200 - self.car.hia / 2]))
         setattr(self.car, 'yrsp', mean([self.car.rrt, self.car.rrt * 2]))
         setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
 
     def set_vec(self, vec: list[int]):
-        for i in range(9):
+        for i in range(17):
             self.car.set_param(i, vec[i])
 
     def get_param(self, i: int) -> int:

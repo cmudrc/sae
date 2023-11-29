@@ -1,7 +1,7 @@
 import unittest
 import scipy.optimize
 from sae import COTSCar, Car, weightsNull, weights1, generate_feasible
-
+from numpy import clip
 
 class TestFullProblem(unittest.TestCase):
 
@@ -93,7 +93,7 @@ class TestCOTSProblem(unittest.TestCase):
             for i in range(len(x)):
                 rounded = round(x[i])
                 x[i] = rounded
-            return x
+            return clip(x, 0, [12, 12, 12, 12, 12, 6, 6, 20, 33, 4, 63, 191, 4, 4, 215, 215, 215])
 
         def objective(x):
             c = COTSCar()
