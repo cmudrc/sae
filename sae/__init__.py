@@ -1,10 +1,10 @@
-# import modules
+import os
+from random import uniform, randint
+from typing import Union
+
 from numpy import array, ones, pi, cos, sqrt, nan, nansum, mean
 from numpy.typing import NDArray
 from pandas import read_csv, read_excel, DataFrame
-from random import uniform, randint
-from typing import Union
-import os
 
 # directory path
 SAEdir: str = os.path.dirname(__file__)
@@ -29,16 +29,18 @@ y_suspension: float = 0.05  # m
 dydt_suspension: float = 0.025  # m/s
 
 # approximate min max values of objectives
-mins_to_scale = [9.54413093e+01, 1.15923589e-01, 4.82833103e+00, 6.29879814e-03, 0.00000000e+00, 1.63642506e+06,
-                 4.04892567e-03, 1.90828686e-02, 5.90877604e+00, 9.81000915e+00, 3.38533564e-02]
-maxs_to_scale = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.21115722e+03, 4.35020445e+00, 6.72530217e+08,
-                 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01, 9.85087184e+03]
+mins_to_scale: list[float] = [9.54413093e+01, 1.15923589e-01, 4.82833103e+00, 6.29879814e-03, 0.00000000e+00,
+                              1.63642506e+06, 4.04892567e-03, 1.90828686e-02, 5.90877604e+00, 9.81000915e+00,
+                              3.38533564e-02]
+maxs_to_scale: list[float] = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.21115722e+03, 4.35020445e+00,
+                              6.72530217e+08, 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01,
+                              9.85087184e+03]
 
 # weights for composing objective from subobjectives
-weightsNull = ones(11) / 11
-weights1 = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
-weights2 = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
-weights3 = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
+weightsNull: NDArray = ones(11) / 11
+weights1: NDArray = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
+weights2: NDArray = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
+weights3: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
 
 
 class Car:
@@ -46,7 +48,7 @@ class Car:
     def __init__(self):
 
         # car vector with continuous and integer variables
-        self.vector = []
+        self.vector: list[Union[float, int]] = []
 
         # continuous parameters with fixed bounds
         for i in range(19):
@@ -120,7 +122,8 @@ class Car:
             self.vector.append(temp)
 
     # objectives
-    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
+    def objectives(self, weights: NDArray = weightsNull, with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
 
         all_objectives = [
             self._mass, self._height_of_center_of_gravity,
@@ -138,7 +141,7 @@ class Car:
         objs = nan * ones(11)
         objs_physical_vals = nan * ones(11)
 
-        if with_subobjs == True:
+        if with_subobjs:
 
             for i in range(11):
                 objs[i] = all_objectives[i]()
@@ -287,7 +290,7 @@ class Car:
 
         if (self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
                                                                                             self.cfsp) - 2 * self.__suspension_force(
-                self.krsp, self.crsp) < 0):
+            self.krsp, self.crsp) < 0):
             pen3.append((self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
                                                                                                          self.cfsp) - 2 * self.__suspension_force(
                 self.krsp, self.crsp)) ** 2)
@@ -388,10 +391,9 @@ class Car:
 
     # objective 4 - total downforce (maximize)
     def _total_down_force(self) -> float:
-        down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        return down_force_rear_wing + down_force_front_wing + 2 * down_force_side_wing
+        return (self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+                + self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+                + 2 * self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car))
 
     # objective 5 - acceleration (maximize)
     def _acceleration(self) -> float:
@@ -464,7 +466,7 @@ class Car:
         lcg = self.lc
         lf = 0.5
         return (2 * Ffsp * lf + 2 * Frsp * lf + down_force_rear_wing * (lcg - self.lrw) - down_force_front_wing * (
-                    lcg - self.lfw) - 2 * down_force_side_wing * (lcg - self.lsw))
+                lcg - self.lfw) - 2 * down_force_side_wing * (lcg - self.lsw))
 
     # mass of subsystems
     def __rear_wing_mass(self) -> float:
@@ -498,28 +500,31 @@ class Car:
         return w * cos(alpha) / l
 
     # lift co-effecient
-    def __lift_coefficient(self, AR: float, alpha: float) -> float:
-        return 2 * pi * (AR / (AR + 2)) * alpha
+    def __lift_coefficient(self, aspect_ratio: float, alpha: float) -> float:
+        return 2 * pi * (aspect_ratio / (aspect_ratio + 2)) * alpha
 
     # drag co-efficient
-    def __drag_coefficient(self, C_lift: float, aspect_ratio: float) -> float:
-        return C_lift ** 2 / (pi * aspect_ratio)
+    def __drag_coefficient(self, lift_coefficient: float, aspect_ratio: float) -> float:
+        return lift_coefficient ** 2 / (pi * aspect_ratio)
 
     # wing downforce
-    def __wing_down_force(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.__wing_aspect_ratio(w, alpha, l)
-        C_l = self.__lift_coefficient(wingAR, alpha)
-        return 0.5 * alpha * h * w * rho_air * (v_car ** 2) * C_l
+    def __wing_down_force(self, width: float, height: float, l: float, alpha: float, rho_air: float,
+                          car_velocity: float) -> float:
+        wing_aspect_ratio = self.__wing_aspect_ratio(width, alpha, l)
+        lift_coefficient = self.__lift_coefficient(wing_aspect_ratio, alpha)
+        return 0.5 * alpha * height * width * rho_air * (car_velocity ** 2) * lift_coefficient
 
     # wing drag
-    def __wing_drag_force(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.__wing_aspect_ratio(w, alpha, l)
-        C_l = self.__lift_coefficient(wingAR, alpha)
-        C_d = self.__drag_coefficient(C_l, wingAR)
-        return self.__drag_force(w, h, rho_air, v_car, C_d)
+    def __wing_drag_force(self, width: float, height: float, l: float, alpha: float, rho_air: float,
+                          car_velocity: float) -> float:
+        wing_aspect_ratio = self.__wing_aspect_ratio(width, alpha, l)
+        lift_coefficient = self.__lift_coefficient(wing_aspect_ratio, alpha)
+        drag_coefficient = self.__drag_coefficient(lift_coefficient, wing_aspect_ratio)
+        return self.__drag_force(width, height, rho_air, car_velocity, drag_coefficient)
 
     # drag
-    def __drag_force(self, width: float, height: float, rho_air: float, car_velocity: float, drag_coefficient: float) -> float:
+    def __drag_force(self, width: float, height: float, rho_air: float, car_velocity: float,
+                     drag_coefficient: float) -> float:
         return 0.5 * width * height * rho_air * car_velocity ** 2 * drag_coefficient
 
 
@@ -598,8 +603,13 @@ class COTSCar:
         setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
 
     # objectives
-    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
-        return self.car.objectives(weights, with_subobjs=with_subobjs, tominimize_and_scaled=tominimize_and_scaled)
+    def objectives(self,
+                   weights: NDArray = weightsNull,
+                   with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
+        return self.car.objectives(weights=weights,
+                                   with_subobjs=with_subobjs,
+                                   tominimize_and_scaled=tominimize_and_scaled)
 
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
     def constraints_bound(self) -> NDArray[float]:
@@ -646,7 +656,6 @@ class COTSCar:
             setattr(self, params.at[43, 'variable'], suspension.at[val, 'kfsp'])
             setattr(self, params.at[44, 'variable'], suspension.at[val, 'cfsp'])
             setattr(self, params.at[45, 'variable'], suspension.at[val, 'mfsp'])
-
 
         # update continuous parameters with variable bounds since some bounds might have changed
         setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
