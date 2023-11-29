@@ -8,7 +8,7 @@ class TestFullProblem(unittest.TestCase):
     def test_random_generation(self):
         # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
         test_car = Car()
-        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+        test_car.objectives(weights=weights1, with_subobjs=True, tominimize_and_scaled=True)
 
         # evaluate constraint violation penalites (square penalty)
         test_car.constraints_bound()
@@ -18,7 +18,7 @@ class TestFullProblem(unittest.TestCase):
     def test_feasible_generation(self):
         # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
         test_car = generate_feasible()
-        test_car.objectives(weights1, with_subobjs=True, tominimize_and_scaled=True)
+        test_car.objectives(weights=weights1, with_subobjs=True, tominimize_and_scaled=True)
 
         # evaluate constraint violation penalites (square penalty)
         test_car.constraints_bound()
