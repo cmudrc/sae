@@ -57,9 +57,9 @@ class TestFullProblem(unittest.TestCase):
             generate_feasible().vector,
             method='trust-constr',
             constraints=(
-                {'type': 'ineq', 'fun': penalty_1},
-                {'type': 'ineq', 'fun': penalty_2},
-                {'type': 'ineq', 'fun': penalty_3}
+                {'type': 'eq', 'fun': penalty_1},
+                {'type': 'eq', 'fun': penalty_2},
+                {'type': 'eq', 'fun': penalty_3}
             ),
         )
         print(res)
@@ -120,9 +120,9 @@ class TestCOTSProblem(unittest.TestCase):
             generate_feasible(cots=True).vector,
             method='trust-constr',
             constraints=(
-                {'type': 'ineq', 'fun': penalty_1},
-                {'type': 'ineq', 'fun': penalty_2},
-                {'type': 'ineq', 'fun': penalty_3}
+                {'type': 'eq', 'fun': penalty_1},
+                {'type': 'eq', 'fun': penalty_2},
+                {'type': 'eq', 'fun': penalty_3}
             ),
         )
         print(res)
