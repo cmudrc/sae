@@ -1,9 +1,10 @@
-# import modules
-from numpy import array, ones, pi, cos, sqrt, nan, nansum, mean
-from pandas import read_csv, read_excel, DataFrame
-from random import uniform, randint
-import typing
 import os
+from random import uniform, randint
+from typing import Union
+
+from numpy import array, ones, pi, cos, sqrt, nan, nansum, mean
+from numpy.typing import NDArray
+from pandas import read_csv, read_excel, DataFrame
 
 # directory path
 SAEdir: str = os.path.dirname(__file__)
@@ -15,6 +16,10 @@ tires: DataFrame = read_csv(SAEdir + "/resources/tires.csv")
 motors: DataFrame = read_csv(SAEdir + "/resources/motors.csv")
 brakes: DataFrame = read_csv(SAEdir + "/resources/brakes.csv")
 suspension: DataFrame = read_csv(SAEdir + "/resources/suspension.csv")
+attenuators: DataFrame = read_csv(SAEdir + "/resources/attenuators.csv")
+cabins: DataFrame = read_csv(SAEdir + "/resources/cabins.csv")
+pressure: DataFrame = read_csv(SAEdir + "/resources/pressure.csv")
+wings: DataFrame = read_csv(SAEdir + "/resources/wings.csv")
 
 # constants
 v_car: float = 26.8  # m/s
@@ -28,16 +33,18 @@ y_suspension: float = 0.05  # m
 dydt_suspension: float = 0.025  # m/s
 
 # approximate min max values of objectives
-mins_to_scale = [9.54413093e+01, 1.15923589e-01, 4.82833103e+00, 6.29879814e-03, 0.00000000e+00, 1.63642506e+06,
-                 4.04892567e-03, 1.90828686e-02, 5.90877604e+00, 9.81000915e+00, 3.38533564e-02]
-maxs_to_scale = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.21115722e+03, 4.35020445e+00, 6.72530217e+08,
-                 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01, 9.85087184e+03]
+mins_to_scale: list[float] = [9.54413093e+01, 1.15923589e-01, 4.82833103e+00, 6.29879814e-03, 0.00000000e+00,
+                              1.63642506e+06, 4.04892567e-03, 1.90828686e-02, 5.90877604e+00, 9.81000915e+00,
+                              3.38533564e-02]
+maxs_to_scale: list[float] = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.21115722e+03, 4.35020445e+00,
+                              6.72530217e+08, 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01,
+                              9.85087184e+03]
 
 # weights for composing objective from subobjectives
-weightsNull = ones(11) / 11
-weights1 = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
-weights2 = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
-weights3 = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
+weightsNull: NDArray = ones(11) / 11
+weights1: NDArray = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
+weights2: NDArray = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
+weights3: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
 
 
 class Car:
@@ -45,7 +52,7 @@ class Car:
     def __init__(self):
 
         # car vector with continuous and integer variables
-        self.vector = []
+        self.vector: list[Union[float, int]] = []
 
         # continuous parameters with fixed bounds
         for i in range(19):
@@ -119,7 +126,8 @@ class Car:
             self.vector.append(temp)
 
     # objectives
-    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
+    def objectives(self, weights: NDArray = weightsNull, with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
 
         all_objectives = [
             self._mass, self._height_of_center_of_gravity,
@@ -137,7 +145,7 @@ class Car:
         objs = nan * ones(11)
         objs_physical_vals = nan * ones(11)
 
-        if with_subobjs == True:
+        if with_subobjs:
 
             for i in range(11):
                 objs[i] = all_objectives[i]()
@@ -159,7 +167,7 @@ class Car:
                     objs[i] = -all_objectives[i]()
                     objs[i] = (objs[i] - (-maxs_to_scale[i])) / (-mins_to_scale[i] - (-maxs_to_scale[i]))
 
-        global_obj = nansum(objs * weights)
+        global_obj = nansum(objs * weights).sum()
 
         if with_subobjs:
             if tominimize_and_scaled:
@@ -170,7 +178,7 @@ class Car:
             return global_obj
 
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
-    def constraints_bound(self):
+    def constraints_bound(self) -> NDArray[float]:
         pen1 = []
 
         for i in range(19):
@@ -184,7 +192,7 @@ class Car:
 
     # calculates penalty for violating constraints of the type A.{parameters} < b, where A is a matrix and b is a vector
     # both bounds are checked in case lower bound > upper bound
-    def constraints_lin_ineq(self):
+    def constraints_lin_ineq(self) -> NDArray[float]:
         pen2 = []
 
         if self.wrw < 0.3:
@@ -281,12 +289,12 @@ class Car:
 
         # calculates penalty for violating constraints of the type f{parameters} < 0
 
-    def constraints_nonlin_ineq(self):
+    def constraints_nonlin_ineq(self) -> NDArray[float]:
         pen3 = []
 
         if (self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
                                                                                             self.cfsp) - 2 * self.__suspension_force(
-                self.krsp, self.crsp) < 0):
+            self.krsp, self.crsp) < 0):
             pen3.append((self._total_down_force() + self._mass() * gravity - 2 * self.__suspension_force(self.kfsp,
                                                                                                          self.cfsp) - 2 * self.__suspension_force(
                 self.krsp, self.crsp)) ** 2)
@@ -300,7 +308,7 @@ class Car:
 
         return array(pen3)
 
-    def set_param(self, i, val):
+    def set_param(self, i: int, val: Union[float, int]):
         self.vector[i] = val
 
         if i < 19:
@@ -338,14 +346,14 @@ class Car:
         else:
             setattr(self, params.at[i + 17, 'variable'], val)
 
-    def set_vec(self, vec):
+    def set_vec(self, vec: list[Union[float, int]]):
         for i in range(39):
             self.set_param(i, vec[i])
 
-    def get_param(self, i):
+    def get_param(self, i: int) -> Union[float, int]:
         return self.vector[i]
 
-    def get_vec(self):
+    def get_vec(self) -> list[Union[float, int]]:
         return self.vector
 
     # objective 1 - mass (minimize)
@@ -363,7 +371,7 @@ class Car:
                 + 2 * self.mfsp)
 
     # objective 2 - centre of gravity height (minimize)
-    def _height_of_center_of_gravity(self):
+    def _height_of_center_of_gravity(self) -> float:
         t1 = (self.__rear_wing_mass() * self.yrw
               + self.__front_wing_mass() * self.yfw
               + self.me * self.ye
@@ -378,22 +386,20 @@ class Car:
         return t1 + t2
 
     # objective 3 - total drag (minimize)
-    def _total_drag_force(self):
-        cabin_drag = self.__drag_force(self.wc, self.hc, rho_air, v_car, C_dc)
-        rear_wing_drag = self.__wing_drag_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        front_wing_drag = self.__wing_drag_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        side_wing_drag = self.__wing_drag_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        return rear_wing_drag + front_wing_drag + 2 * side_wing_drag + cabin_drag
+    def _total_drag_force(self) -> float:
+        return (self.__wing_drag_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+                + self.__wing_drag_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+                + 2 * self.__wing_drag_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
+                + self.__drag_force(self.wc, self.hc, rho_air, v_car, C_dc))
 
     # objective 4 - total downforce (maximize)
-    def _total_down_force(self):
-        down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
-        return down_force_rear_wing + down_force_front_wing + 2 * down_force_side_wing
+    def _total_down_force(self) -> float:
+        return (self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
+                + self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
+                + 2 * self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car))
 
     # objective 5 - acceleration (maximize)
-    def _acceleration(self):
+    def _acceleration(self) -> float:
         total_resistance = self._total_drag_force() + self.__rolling_resistance(self.Prt, v_car)
 
         w_wheels = v_car / self.rrt
@@ -408,15 +414,15 @@ class Car:
         return (F_wheels - total_resistance) / self._mass()
 
     # objective 6 - crash force (minimize)
-    def _crash_force(self):
+    def _crash_force(self) -> float:
         return sqrt(self._mass() * v_car ** 2 * self.wia * self.hia * self.Eia / (2 * self.lia))
 
     # objective 7 - impact attenuator volume (minimize)
-    def _impact_attenuator_volume(self):
+    def _impact_attenuator_volume(self) -> float:
         return self.lia * self.wia * self.hia
 
     # objective 8 - corner velocity in skid pad (maximize)
-    def _corner_velocity(self):
+    def _corner_velocity(self) -> float:
         Clat = 1.6
         total_mass = self._mass()
         forces = (self._total_down_force()
@@ -428,7 +434,7 @@ class Car:
         return sqrt(forces * Clat * r_track / total_mass)
 
     # objective 9 - (minimize)
-    def _breaking_distance(self):
+    def _breaking_distance(self) -> float:
         total_mass = self._mass()
         C = .005 + 1 / self.Prt * (.01 + .0095 * ((v_car * 3.6 / 100) ** 2))
 
@@ -445,7 +451,7 @@ class Car:
         return v_car ** 2 / (2 * a_brk)
 
     # objective 10 - (minimize)
-    def _suspension_acceleration(self):
+    def _suspension_acceleration(self) -> float:
         total_mass = self._mass()
         return -(2 * self.__suspension_force(self.kfsp, self.cfsp)
                  - 2 * self.__suspension_force(self.krsp, self.crsp)
@@ -454,34 +460,32 @@ class Car:
                  ) / total_mass
 
     # objective 11 - (minimize)
-    def _pitch_moment(self):
-        Ffsp = self.__suspension_force(self.kfsp, self.cfsp)
-        Frsp = self.__suspension_force(self.krsp, self.crsp)
-        down_force_rear_wing = self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car)
-        down_force_front_wing = self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car)
-        down_force_side_wing = self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car)
+    def _pitch_moment(self) -> float:
         lcg = self.lc
         lf = 0.5
-        return (2 * Ffsp * lf + 2 * Frsp * lf + down_force_rear_wing * (lcg - self.lrw) - down_force_front_wing * (
-                    lcg - self.lfw) - 2 * down_force_side_wing * (lcg - self.lsw))
+        return (2 * self.__suspension_force(self.kfsp, self.cfsp) * lf
+                + 2 * self.__suspension_force(self.krsp, self.crsp) * lf
+                + self.__wing_down_force(self.wrw, self.hrw, self.lrw, self.arw, rho_air, v_car) * (lcg - self.lrw)
+                - self.__wing_down_force(self.wfw, self.hfw, self.lfw, self.afw, rho_air, v_car) * (lcg - self.lfw)
+                - 2 * self.__wing_down_force(self.wsw, self.hsw, self.lsw, self.asw, rho_air, v_car) * (lcg - self.lsw))
 
     # mass of subsystems
-    def __rear_wing_mass(self):
+    def __rear_wing_mass(self) -> float:
         return self.lrw * self.wrw * self.hrw * self.qrw
 
-    def __front_wing_mass(self):
+    def __front_wing_mass(self) -> float:
         return self.lfw * self.wfw * self.hfw * self.qfw
 
-    def __side_wing_mass(self):
+    def __side_wing_mass(self) -> float:
         return self.lsw * self.wsw * self.hsw * self.qsw
 
-    def __impact_attenuator_mass(self):
+    def __impact_attenuator_mass(self) -> float:
         return self.lia * self.wia * self.hia * self.qia
 
-    def __mc(self):
+    def __mc(self) -> float:
         return 2 * (self.hc * self.lc * self.tc + self.hc * self.wc * self.tc + self.lc * self.hc * self.tc) * self.qc
 
-    def __mbrk(self):
+    def __mbrk(self) -> float:
         return self.lbrk * self.wbrk * self.hbrk * self.qbrk
 
     # rolling resistance
@@ -497,29 +501,32 @@ class Car:
         return w * cos(alpha) / l
 
     # lift co-effecient
-    def __lift_coefficient(self, AR: float, alpha: float) -> float:
-        return 2 * pi * (AR / (AR + 2)) * alpha
+    def __lift_coefficient(self, aspect_ratio: float, alpha: float) -> float:
+        return 2 * pi * (aspect_ratio / (aspect_ratio + 2)) * alpha
 
     # drag co-efficient
-    def __drag_coefficient(self, C_lift: float, aspect_ratio: float) -> float:
-        return C_lift ** 2 / (pi * aspect_ratio)
+    def __drag_coefficient(self, lift_coefficient: float, aspect_ratio: float) -> float:
+        return lift_coefficient ** 2 / (pi * aspect_ratio)
 
     # wing downforce
-    def __wing_down_force(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.__wing_aspect_ratio(w, alpha, l)
-        C_l = self.__lift_coefficient(wingAR, alpha)
-        return 0.5 * alpha * h * w * rho_air * (v_car ** 2) * C_l
+    def __wing_down_force(self, width: float, height: float, length: float, alpha: float, rho_air: float,
+                          car_velocity: float) -> float:
+        wing_aspect_ratio = self.__wing_aspect_ratio(width, alpha, length)
+        lift_coefficient = self.__lift_coefficient(wing_aspect_ratio, alpha)
+        return 0.5 * alpha * height * width * rho_air * (car_velocity ** 2) * lift_coefficient
 
     # wing drag
-    def __wing_drag_force(self, w, h, l, alpha, rho_air, v_car):
-        wingAR = self.__wing_aspect_ratio(w, alpha, l)
-        C_l = self.__lift_coefficient(wingAR, alpha)
-        C_d = self.__drag_coefficient(C_l, wingAR)
-        return self.__drag_force(w, h, rho_air, v_car, C_d)
+    def __wing_drag_force(self, width: float, height: float, length: float, alpha: float, rho_air: float,
+                          car_velocity: float) -> float:
+        wing_aspect_ratio = self.__wing_aspect_ratio(width, alpha, length)
+        lift_coefficient = self.__lift_coefficient(wing_aspect_ratio, alpha)
+        drag_coefficient = self.__drag_coefficient(lift_coefficient, wing_aspect_ratio)
+        return self.__drag_force(width, height, rho_air, car_velocity, drag_coefficient)
 
     # drag
-    def __drag_force(self, w, h, rho_air, car_velocity, drag_coefficient):
-        return 0.5 * w * h * rho_air * car_velocity ** 2 * drag_coefficient
+    def __drag_force(self, width: float, height: float, rho_air: float, car_velocity: float,
+                     drag_coefficient: float) -> float:
+        return 0.5 * width * height * rho_air * car_velocity ** 2 * drag_coefficient
 
 
 class COTSCar:
@@ -532,8 +539,8 @@ class COTSCar:
         self.vector = []
 
         # Fix some values at average of bounds
-        for i in range(19):
-            temp = mean([params.at[i, 'min'], params.at[i, 'max']])
+        for i in range(13):
+            temp = mean([float(params.at[i, 'min']), float(params.at[i, 'max'])])
             self.car.set_param(i, temp)
 
         # first 5 entries are for materials
@@ -584,35 +591,87 @@ class COTSCar:
         setattr(self.car, params.at[45, 'variable'], suspension.at[self.car.suspension, 'mfsp'])
         self.vector.append(self.car.suspension)
 
+        # 11th entry is for impact attenuator choice
+        self.impact_attenuator = randint(0, attenuators.shape[0]-1)
+        self.car.hia = attenuators.at[self.impact_attenuator, 'height']
+        self.car.wia = attenuators.at[self.impact_attenuator, 'width']
+        self.car.lia = attenuators.at[self.impact_attenuator, 'length']
+        self.vector.append(self.impact_attenuator)
+
+        # 12th entry is for cabin choice
+        self.cabin = randint(0, cabins.shape[0]-1)
+        self.car.hc = cabins.at[self.cabin, 'height']
+        self.car.lc = cabins.at[self.cabin, 'width']
+        self.car.wc = cabins.at[self.cabin, 'length']
+        self.car.tc = cabins.at[self.cabin, 'thickness']
+        self.vector.append(self.cabin)
+
+        # 13th and 14th choices are for tire pressure rating
+        self.front_tire_pressure = randint(0, pressure.shape[0]-1)
+        self.car.Pft = pressure.at[self.front_tire_pressure, 'pressure']
+        self.vector.append(self.front_tire_pressure)
+        self.rear_tire_pressure = randint(0, pressure.shape[0]-1)
+        self.car.Prt = pressure.at[self.rear_tire_pressure, 'pressure']
+        self.vector.append(self.rear_tire_pressure)
+
+        # 15th choice is for rear wing
+        self.rear_wing = randint(0, wings.shape[0] - 1)
+        self.car.hrw = wings.at[self.rear_wing, 'height']
+        self.car.lrw = wings.at[self.rear_wing, 'length']
+        self.car.wrw = wings.at[self.rear_wing, 'width']
+        self.car.arw = wings.at[self.rear_wing, 'angle of attack']
+        self.vector.append(self.rear_wing)
+
+        # 16th choice is for front wing
+        self.front_wing = randint(0, wings.shape[0] - 1)
+        self.car.hfw = wings.at[self.front_wing, 'height']
+        self.car.lfw = wings.at[self.front_wing, 'length']
+        self.car.wfw = wings.at[self.front_wing, 'width']
+        self.car.afw = wings.at[self.front_wing, 'angle of attack']
+        self.vector.append(self.front_wing)
+
+        # 17th choice is for side wings
+        self.side_wing = randint(0, wings.shape[0] - 1)
+        self.car.hsw = wings.at[self.side_wing, 'height']
+        self.car.lsw = wings.at[self.side_wing, 'length']
+        self.car.wsw = wings.at[self.side_wing, 'width']
+        self.car.asw = wings.at[self.side_wing, 'angle of attack']
+        self.vector.append(self.side_wing)
+
         # continuous parameters with variable bounds
-        setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
+        # setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
         setattr(self.car, 'yrw', mean([0.5 + self.car.hrw / 2, 1.2 - self.car.hrw / 2]))
         setattr(self.car, 'yfw', mean([0.03 + self.car.hfw / 2, .25 - self.car.hfw / 2]))
         setattr(self.car, 'ysw', mean([0.03 + self.car.hsw / 2, .250 - self.car.hsw / 2]))
         setattr(self.car, 'ye', mean([0.03 + self.car.he / 2, .5 - self.car.he / 2]))
         setattr(self.car, 'yc', mean([0.03 + self.car.hc / 2, 1.200 - self.car.hc / 2]))
-        setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
+        # setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
         setattr(self.car, 'yia', mean([0.03 + self.car.hia / 2, 1.200 - self.car.hia / 2]))
         setattr(self.car, 'yrsp', mean([self.car.rrt, self.car.rrt * 2]))
         setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
 
     # objectives
-    def objectives(self, weights=weightsNull, with_subobjs=True, tominimize_and_scaled=True):
-        return self.car.objectives(weights, with_subobjs=with_subobjs, tominimize_and_scaled=tominimize_and_scaled)
+    def objectives(self,
+                   weights: NDArray = weightsNull,
+                   with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
+        return self.car.objectives(weights=weights,
+                                   with_subobjs=with_subobjs,
+                                   tominimize_and_scaled=tominimize_and_scaled)
 
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
-    def constraints_bound(self):
+    def constraints_bound(self) -> NDArray[float]:
         return self.car.constraints_bound()
 
     # calculates penalty for violating constraints of the type A.{parameters} < b, where A is a matrix and b is a vector
     # both bounds are checked in case lower bound > upper bound
-    def constraints_lin_ineq(self):
+    def constraints_lin_ineq(self) -> NDArray[float]:
         return self.car.constraints_lin_ineq()
 
-    def constraints_nonlin_ineq(self):
+    def constraints_nonlin_ineq(self) -> NDArray[float]:
         return self.car.constraints_nonlin_ineq()
 
-    def set_param(self, i, val):
+    def set_param(self, i: int, val: int):
         self.vector[i] = val
 
         if i < 5:
@@ -645,20 +704,67 @@ class COTSCar:
             setattr(self, params.at[43, 'variable'], suspension.at[val, 'kfsp'])
             setattr(self, params.at[44, 'variable'], suspension.at[val, 'cfsp'])
             setattr(self, params.at[45, 'variable'], suspension.at[val, 'mfsp'])
+        elif i == 10:
+            self.impact_attenuator = val
+            self.car.hia = attenuators.at[val, 'height']
+            self.car.wia = attenuators.at[val, 'width']
+            self.car.lia = attenuators.at[val, 'length']
+        elif i == 11:
+            self.cabin = val
+            self.car.hc = attenuators.at[val, 'height']
+            self.car.lc = attenuators.at[val, 'width']
+            self.car.wc = attenuators.at[val, 'length']
+            self.car.tc = attenuators.at[val, 'thickness']
+        elif i == 12:
+            self.front_tire_pressure = val
+            self.car.Pft = pressure.at[val, 'pressure']
+        elif i == 13:
+            self.rear_tire_pressure = val
+            self.car.Prt = pressure.at[val, 'pressure']
+        elif i == 14:
+            self.rear_wing = val
+            self.car.hrw = wings.at[val, 'height']
+            self.car.lrw = wings.at[val, 'length']
+            self.car.wrw = wings.at[val, 'width']
+            self.car.arw = wings.at[val, 'angle of attack']
+        elif i == 15:
+            self.front_wing = val
+            self.car.hfw = wings.at[val, 'height']
+            self.car.lfw = wings.at[val, 'length']
+            self.car.wfw = wings.at[val, 'width']
+            self.car.afw = wings.at[val, 'angle of attack']
+        elif i == 16:
+            self.side_wing = val
+            self.car.hsw = wings.at[val, 'height']
+            self.car.lsw = wings.at[val, 'length']
+            self.car.wsw = wings.at[val, 'width']
+            self.car.asw = wings.at[val, 'angle of attack']
 
-    def set_vec(self, vec):
-        for i in range(9):
-            self.set_param(i, vec[i])
+        # update continuous parameters with variable bounds since some bounds might have changed
+        # setattr(self.car, 'wrw', mean([0.3, 3 - 2 * self.car.rrt]))
+        setattr(self.car, 'yrw', mean([0.5 + self.car.hrw / 2, 1.2 - self.car.hrw / 2]))
+        setattr(self.car, 'yfw', mean([0.03 + self.car.hfw / 2, .25 - self.car.hfw / 2]))
+        setattr(self.car, 'ysw', mean([0.03 + self.car.hsw / 2, .250 - self.car.hsw / 2]))
+        setattr(self.car, 'ye', mean([0.03 + self.car.he / 2, .5 - self.car.he / 2]))
+        setattr(self.car, 'yc', mean([0.03 + self.car.hc / 2, 1.200 - self.car.hc / 2]))
+        # setattr(self.car, 'lia', mean([0.2, .7 - self.car.lfw]))
+        setattr(self.car, 'yia', mean([0.03 + self.car.hia / 2, 1.200 - self.car.hia / 2]))
+        setattr(self.car, 'yrsp', mean([self.car.rrt, self.car.rrt * 2]))
+        setattr(self.car, 'yfsp', mean([self.car.rft, self.car.rft * 2]))
 
-    def get_param(self, i):
+    def set_vec(self, vec: list[int]):
+        for i in range(17):
+            self.car.set_param(i, vec[i])
+
+    def get_param(self, i: int) -> int:
         return self.vector[i]
 
-    def get_vec(self):
+    def get_vec(self) -> list[int]:
         return self.vector
 
 
 # generates cars until constraints_nonlin_ineq satisfied
-def generate_feasible(cots: bool = False) -> typing.Union[Car, COTSCar]:
+def generate_feasible(cots: bool = False) -> Union[Car, COTSCar]:
     while True:
         feasible_car = COTSCar() if cots else Car()
         if sum(feasible_car.constraints_nonlin_ineq()) == 0:
