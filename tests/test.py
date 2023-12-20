@@ -25,6 +25,10 @@ class TestFullProblem(unittest.TestCase):
         test_car.constraints_lin_ineq()
         test_car.constraints_nonlin_ineq()
 
+    def test_pw(self):
+        test_car = generate_feasible()
+        test_car.parthworth_objectives()
+
     def test_minimize(self):
         def round_x(x):
             for i in range(19, 29):

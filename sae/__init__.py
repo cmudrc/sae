@@ -199,16 +199,16 @@ class Car:
 
         if with_subobjs:
 
-            for i in range(11):
+            for i in range(len(all_objectives)):
                 objs[i] = all_objectives[i](self)
                 objs_physical_vals[i] = objs[i]
 
         else:
-            for i in range(11):
+            for i in range(len(all_objectives)):
                 if weights[i] != 0:
                     objs[i] = all_objectives[i](self)
 
-        for i in range(11):
+        for i in range(len(all_objectives)):
             if weights[i] != 0:
 
                 if i != 3 and i != 4 and i != 7:
