@@ -45,7 +45,7 @@ weightsNull: NDArray = ones(11) / 11
 weights1: NDArray = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
 weights2: NDArray = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
 weights3: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
-weights_pw: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
+weights_pw: NDArray = ones(10) / 10
 
 class Car:
     # generates a car that satisfies constraints_bound and constraints_lin_ineq
@@ -178,7 +178,7 @@ class Car:
         else:
             return global_obj
 
-    def parthworth_objectives(self, weights: NDArray = weightsNull, with_subobjs: bool = True,
+    def parthworth_objectives(self, weights: NDArray = weights_pw, with_subobjs: bool = True,
                    tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
 
         all_objectives = [
