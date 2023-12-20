@@ -189,7 +189,7 @@ class Car:
             lambda car: 1.0/(car._impact_attenuator_volume() * car._crash_force()),  # impact attenuator, assuming utility is inverse of volume times crash force
             lambda car: 1.0/(car.__rolling_resistance(car.Prt, v_car)*car.mrt),  # rear tires, assuming utility is inverse of rolling resistance times mass
             lambda car: 1.0/(car.__rolling_resistance(car.Pft, v_car)*car.mft),  # rear tires, assuming utility is inverse of rolling resistance times mass
-            lambda car: car.Te,  # engine, assuming utility is torque
+            lambda car: car.T_e,  # engine, assuming utility is torque
             lambda car: 1.0/car._breaking_distance(),  # brakes, assuming utility is inverse of braking distance
             lambda car: 1.0/car._suspension_acceleration(),  # suspension, assuming utility is inverse of suspension acceleration
         ]
