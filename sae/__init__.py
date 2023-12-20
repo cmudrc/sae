@@ -45,7 +45,7 @@ weightsNull: NDArray = ones(11) / 11
 weights1: NDArray = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
 weights2: NDArray = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
 weights3: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
-
+weights_pw: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
 
 class Car:
     # generates a car that satisfies constraints_bound and constraints_lin_ineq
@@ -130,7 +130,8 @@ class Car:
                    tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
 
         all_objectives = [
-            self._mass, self._height_of_center_of_gravity,
+            self._mass,
+            self._height_of_center_of_gravity,
             self._total_drag_force,
             self._total_down_force,
             self._acceleration,
@@ -140,6 +141,57 @@ class Car:
             self._breaking_distance,
             self._suspension_acceleration,
             self._pitch_moment
+        ]
+
+        objs = nan * ones(11)
+        objs_physical_vals = nan * ones(11)
+
+        if with_subobjs:
+
+            for i in range(11):
+                objs[i] = all_objectives[i]()
+                objs_physical_vals[i] = objs[i]
+
+        else:
+            for i in range(11):
+                if weights[i] != 0:
+                    objs[i] = all_objectives[i]()
+
+        for i in range(11):
+            if weights[i] != 0:
+
+                if i != 3 and i != 4 and i != 7:
+                    objs[i] = all_objectives[i]()
+                    objs[i] = (objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
+
+                else:
+                    objs[i] = -all_objectives[i]()
+                    objs[i] = (objs[i] - (-maxs_to_scale[i])) / (-mins_to_scale[i] - (-maxs_to_scale[i]))
+
+        global_obj = nansum(objs * weights).sum()
+
+        if with_subobjs:
+            if tominimize_and_scaled:
+                return global_obj, objs
+            else:
+                return global_obj, objs_physical_vals
+        else:
+            return global_obj
+
+    def parthworth_objectives(self, weights: NDArray = weightsNull, with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
+
+        all_objectives = [
+            lambda car: car.__wing_down_force(car.wrw, car.hrw, car.lrw, car.arw, rho_air, v_car),  # rear wing, assuming utility is downforce
+            lambda car: car.__wing_down_force(car.wfw, car.hfw, car.lfw, car.afw, rho_air, v_car),  # front wing, assuming utility is downforce
+            lambda car: car.__wing_down_force(car.wsw, car.hsw, car.lsw, car.asw, rho_air, v_car),  # side wing, assuming utility is downforce
+            lambda car: 1.0/(car.__drag_force(car.wc, car.hc, rho_air, v_car, C_dc) * car.__mc()),  # cabin, assuming utility is inverse of drag force times mass
+            lambda car: 1.0/(car._impact_attenuator_volume() * car._crash_force()),  # impact attenuator, assuming utility is inverse of volume times crash force
+            lambda car: 1.0/(car.__rolling_resistance(car.Prt, v_car)*car.mrt),  # rear tires, assuming utility is inverse of rolling resistance times mass
+            lambda car: 1.0/(car.__rolling_resistance(car.Pft, v_car)*car.mft),  # rear tires, assuming utility is inverse of rolling resistance times mass
+            lambda car: car.Te,  # engine, assuming utility is torque
+            lambda car: 1.0/car._breaking_distance(),  # brakes, assuming utility is inverse of braking distance
+            lambda car: 1.0/car._suspension_acceleration(),  # suspension, assuming utility is inverse of suspension acceleration
         ]
 
         objs = nan * ones(11)
