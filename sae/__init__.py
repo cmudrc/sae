@@ -194,21 +194,23 @@ class Car:
             lambda car: 1.0/car._suspension_acceleration(),  # suspension, assuming utility is inverse of suspension acceleration
         ]
 
-        objs = nan * ones(11)
-        objs_physical_vals = nan * ones(11)
+        n = len(all_objectives)
+
+        objs = nan * ones(n)
+        objs_physical_vals = nan * ones(n)
 
         if with_subobjs:
 
-            for i in range(len(all_objectives)):
+            for i in range(n):
                 objs[i] = all_objectives[i](self)
                 objs_physical_vals[i] = objs[i]
 
         else:
-            for i in range(len(all_objectives)):
+            for i in range(n):
                 if weights[i] != 0:
                     objs[i] = all_objectives[i](self)
 
-        for i in range(len(all_objectives)):
+        for i in range(n):
             if weights[i] != 0:
 
                 if i != 3 and i != 4 and i != 7:
