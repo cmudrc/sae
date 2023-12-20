@@ -40,12 +40,19 @@ maxs_to_scale: list[float] = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.
                               6.72530217e+08, 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01,
                               9.85087184e+03]
 
+pw_mins_to_scale: list[float] = [2.76160570e-03, 2.02143787e-04, 6.41722667e-06, 2.96515940e-05,
+       2.33673029e-08, 2.26192034e-04, 2.29668735e-04, 1.24000000e+01,
+       2.69376286e-03, 7.28186732e-02]
+pw_maxs_to_scale: list[float] = [2.04460965e+03, 7.30705566e+02, 5.56488555e+01, 5.97674212e-02,
+       2.23920389e-05, 6.00859341e-03, 5.32847031e-03, 4.41300000e+01,
+       6.11126370e-02, 1.01929749e-01]
+
 # weights for composing objective from subobjectives
 weightsNull: NDArray = ones(11) / 11
 weights1: NDArray = array([14, 1, 20, 30, 10, 1, 1, 10, 10, 2, 1]) / 100
 weights2: NDArray = array([25, 1, 15, 20, 15, 1, 1, 15, 5, 1, 1]) / 100
 weights3: NDArray = array([14, 1, 20, 15, 25, 1, 1, 10, 10, 2, 1]) / 100
-weights_pw: NDArray = ones(10) / 10
+weights_pw_null: NDArray = ones(10) / 10
 
 class Car:
     # generates a car that satisfies constraints_bound and constraints_lin_ineq
@@ -178,7 +185,7 @@ class Car:
         else:
             return global_obj
 
-    def parthworth_objectives(self, weights: NDArray = weights_pw, with_subobjs: bool = True,
+    def parthworth_objectives(self, weights: NDArray = weights_pw_null, with_subobjs: bool = True,
                    tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
 
         all_objectives = [
@@ -212,14 +219,8 @@ class Car:
 
         for i in range(n):
             if weights[i] != 0:
-
-                if i != 3 and i != 4 and i != 7:
                     objs[i] = all_objectives[i](self)
-                    objs[i] = (objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
-
-                else:
-                    objs[i] = -all_objectives[i](self)
-                    objs[i] = (objs[i] - (-maxs_to_scale[i])) / (-mins_to_scale[i] - (-maxs_to_scale[i]))
+                    objs[i] = -(objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
 
         global_obj = nansum(objs * weights).sum()
 
@@ -710,6 +711,14 @@ class COTSCar:
                    with_subobjs: bool = True,
                    tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
         return self.car.objectives(weights=weights,
+                                   with_subobjs=with_subobjs,
+                                   tominimize_and_scaled=tominimize_and_scaled)
+
+    def parthworth_objectives(self,
+                   weights: NDArray = weights_pw_null,
+                   with_subobjs: bool = True,
+                   tominimize_and_scaled: bool = True) -> Union[float, tuple[float, NDArray]]:
+        return self.car.parthworth_objectives(weights=weights,
                                    with_subobjs=with_subobjs,
                                    tominimize_and_scaled=tominimize_and_scaled)
 
