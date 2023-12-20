@@ -200,23 +200,23 @@ class Car:
         if with_subobjs:
 
             for i in range(11):
-                objs[i] = all_objectives[i]()
+                objs[i] = all_objectives[i](self)
                 objs_physical_vals[i] = objs[i]
 
         else:
             for i in range(11):
                 if weights[i] != 0:
-                    objs[i] = all_objectives[i]()
+                    objs[i] = all_objectives[i](self)
 
         for i in range(11):
             if weights[i] != 0:
 
                 if i != 3 and i != 4 and i != 7:
-                    objs[i] = all_objectives[i]()
+                    objs[i] = all_objectives[i](self)
                     objs[i] = (objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
 
                 else:
-                    objs[i] = -all_objectives[i]()
+                    objs[i] = -all_objectives[i](self)
                     objs[i] = (objs[i] - (-maxs_to_scale[i])) / (-mins_to_scale[i] - (-maxs_to_scale[i]))
 
         global_obj = nansum(objs * weights).sum()
