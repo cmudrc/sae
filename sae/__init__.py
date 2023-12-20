@@ -40,12 +40,12 @@ maxs_to_scale: list[float] = [5.59326140e+03, 9.99551980e-01, 6.33946522e+02, 3.
                               6.72530217e+08, 1.57972935e-01, 1.50651984e+01, 5.53922616e+02, 1.87909887e+01,
                               9.85087184e+03]
 
-pw_mins_to_scale: list[float] = [2.76160570e-03, 2.02143787e-04, 6.41722667e-06, 2.96515940e-05,
-       2.33673029e-08, 2.26192034e-04, 2.29668735e-04, 1.24000000e+01,
-       2.69376286e-03, 7.28186732e-02]
-pw_maxs_to_scale: list[float] = [2.04460965e+03, 7.30705566e+02, 5.56488555e+01, 5.97674212e-02,
-       2.23920389e-05, 6.00859341e-03, 5.32847031e-03, 4.41300000e+01,
-       6.11126370e-02, 1.01929749e-01]
+pw_mins_to_scale: list[float] = [3.25446263e-04, 5.94946643e-05, 6.79286212e-06, 2.62536472e-05,
+       3.56225888e-08, 2.74305243e-04, 2.40872200e-04, 1.24000000e+01,
+       3.17064202e-03, 7.30282257e-02]
+pw_maxs_to_scale: list[float] = [2.22177619e+03, 7.15487534e+02, 7.62265913e+01, 9.81404324e-02,
+       2.36996718e-05, 5.29316400e-03, 5.09985957e-03, 4.41300000e+01,
+       7.13998294e-02, 1.01913322e-01]
 
 # weights for composing objective from subobjectives
 weightsNull: NDArray = ones(11) / 11
@@ -220,7 +220,7 @@ class Car:
         for i in range(n):
             if weights[i] != 0:
                     objs[i] = all_objectives[i](self)
-                    objs[i] = -(objs[i] - mins_to_scale[i]) / (maxs_to_scale[i] - mins_to_scale[i])
+                    objs[i] = -(objs[i] - pw_mins_to_scale[i]) / (pw_maxs_to_scale[i] - pw_mins_to_scale[i])
 
         global_obj = nansum(objs * weights).sum()
 
