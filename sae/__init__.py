@@ -699,7 +699,7 @@ class Car:
         )
 
     def __mbrk(self) -> float:
-        return self.lbrk * self.wbrk * self.hbrk * self.qbrk
+        return self.lbrk * self.wbrk * self.hbrk * self.qbrk * 1000
 
     # rolling resistance
     def __rolling_resistance(self, tire_pressure: float, car_velocity: float) -> float:
