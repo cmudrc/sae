@@ -301,10 +301,50 @@ class Car:
 
     def cost(self) -> float:
         return (
-            self.__motor_cost()
+            self.__rear_wing_cost()
+            + self.__front_wing_cost()
+            + 2 * self.__side_wing_cost()
             + 2 * self.__front_tire_cost()
             + 2 * self.__rear_tire_cost()
+            + self.__motor_cost()
+            + self.__cabin_cost()
+            + self.__impact_attenuator_cost()
+            + 4 * self.__brake_cost()
+            + 2 * self.__rear_suspension_cost()
+            + 2 * self.__front_suspension_cost()
         )
+
+    def __rear_wing_cost(self) -> float:
+        idx = materials.index[materials["q"] == self.qrw].tolist()[0]
+        return self.__rear_wing_mass() * materials.at[idx, "cost_per_kilogram"]
+
+    def __front_wing_cost(self) -> float:
+        idx = materials.index[materials["q"] == self.qfw].tolist()[0]
+        return self.__front_wing_mass() * materials.at[idx, "cost_per_kilogram"]
+
+    def __rear_suspension_cost(self) -> float:
+        # Assuming suspension has fixed cost and is "tuned"
+        return 0
+
+    def __front_suspension_cost(self) -> float:
+        # Assuming suspension has fixed cost and is "tuned"
+        return 0
+
+    def __side_wing_cost(self) -> float:
+        idx = materials.index[materials["q"] == self.qsw].tolist()[0]
+        return self.__side_wing_mass() * materials.at[idx, "cost_per_kilogram"]
+
+    def __brake_cost(self) -> float:
+        # Multiple mass by approximate cost per mass
+        return self.__mbrk() * 25
+
+    def __cabin_cost(self) -> float:
+        idx = materials.index[materials["q"] == self.qc].tolist()[0]
+        return self.__mc() * materials.at[idx, "cost_per_kilogram"]
+
+    def __impact_attenuator_cost(self) -> float:
+        idx = materials.index[materials["q"] == self.qia].tolist()[0]
+        return self.__impact_attenuator_mass() * materials.at[idx, "cost_per_kilogram"]
 
     def __motor_cost(self) -> float:
         return motors.at[self.engine, "Cost"]
