@@ -14,6 +14,7 @@ class TestFullProblem(unittest.TestCase):
         test_car.constraints_bound()
         test_car.constraints_lin_ineq()
         test_car.constraints_nonlin_ineq()
+        test_car.cost()
 
     def test_feasible_generation(self):
         # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
@@ -24,6 +25,7 @@ class TestFullProblem(unittest.TestCase):
         test_car.constraints_bound()
         test_car.constraints_lin_ineq()
         test_car.constraints_nonlin_ineq()
+        test_car.cost()
 
     def test_pw(self):
         test_car = generate_feasible()
@@ -80,6 +82,7 @@ class TestCOTSProblem(unittest.TestCase):
         test_car.constraints_bound()
         test_car.constraints_lin_ineq()
         test_car.constraints_nonlin_ineq()
+        test_car.cost()
 
     def test_feasible_generation_cots(self):
         # generate a random car that always satisfies constraints_bound and constraints_lin_ineq
@@ -90,6 +93,7 @@ class TestCOTSProblem(unittest.TestCase):
         test_car.constraints_bound()
         test_car.constraints_lin_ineq()
         test_car.constraints_nonlin_ineq()
+        test_car.cost()
 
     def test_minimize_cots(self):
 

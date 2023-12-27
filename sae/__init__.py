@@ -232,6 +232,21 @@ class Car:
         else:
             return global_obj
 
+    def cost(self) -> float:
+        return self.__motor_cost() + 2*self.__front_tire_cost() + 2*self.__rear_tire_cost()
+
+    def __motor_cost(self) -> float:
+        return motors.at[self.engine, 'Cost']
+
+    def __front_tire_cost(self) -> float:
+        # this is a very approximate adjustment based on rated tire pressure
+        return tires.at[self.front_tire, 'cost']*(1 + (self.Pft - 0.758)/2.0)
+
+    def __rear_tire_cost(self) -> float:
+        # this is a very approximate adjustment based on rated tire pressure
+        return tires.at[self.rear_tire, 'cost']*(1 + (self.Prt - 0.758)/2.0)
+
+
     # calculates penalty for violating constraints of the type lower bound < paramter value < upper bound
     def constraints_bound(self) -> NDArray[float]:
         pen1 = []
@@ -824,6 +839,9 @@ class COTSCar:
 
     def get_vec(self) -> list[int]:
         return self.vector
+
+    def cost(self) -> float:
+        return self.car.cost()
 
 
 # generates cars until constraints_nonlin_ineq satisfied
