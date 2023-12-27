@@ -1,6 +1,6 @@
-,Pressure Rating,pressure,pressure (Ordering Pressure Ratings)
-0,Basic,0.758,0.758
-1,Low,0.834,0.834
-2,Medium,0.904,0.904
-3,High,0.97,0.97
-4,Pro,1.03,1.03
+,Pressure Rating,pressure,cost_multiplier,pressure (Ordering Pressure Ratings)
+0,Basic,0.758,1.00,0.758
+1,Low,0.834,1.02,0.834
+2,Medium,0.904,1.04,0.904
+3,High,0.97,1.08,0.97
+4,Pro,1.03,1.16,1.03
