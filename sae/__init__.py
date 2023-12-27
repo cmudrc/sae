@@ -228,7 +228,7 @@ class Car:
         else:
             return global_obj
 
-    def parthworth_objectives(
+    def partworth_objectives(
         self,
         weights: NDArray = weights_pw_null,
         with_subobjs: bool = True,
@@ -991,13 +991,13 @@ class COTSCar:
             tominimize_and_scaled=tominimize_and_scaled,
         )
 
-    def parthworth_objectives(
+    def partworth_objectives(
         self,
         weights: NDArray = weights_pw_null,
         with_subobjs: bool = True,
         tominimize_and_scaled: bool = True,
     ) -> Union[float, tuple[float, NDArray]]:
-        return self.car.parthworth_objectives(
+        return self.car.partworth_objectives(
             weights=weights,
             with_subobjs=with_subobjs,
             tominimize_and_scaled=tominimize_and_scaled,
