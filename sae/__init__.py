@@ -1104,7 +1104,8 @@ class COTSCar:
 
     def set_vec(self, vec: list[int]):
         for i in range(17):
-            self.car.set_param(i, vec[i])
+            print(i, vec[i])
+            self.set_param(i, vec[i])
 
     def get_param(self, i: int) -> int:
         return self.vector[i]
