@@ -98,6 +98,18 @@ class TestCOTSProblem(unittest.TestCase):
         test_car.constraints_nonlin_ineq()
         test_car.cost()
 
+    def test_hugh_bug(self):
+        carDesignVec = [12, 7, 6, 12, 9, 1, 0, 13, 9, 1, 39, 26, 2, 1, 33, 11, 4]
+        product = COTSCar()
+        print("COTSCar vec:", product.get_vec())
+        print("Car vec:", product.car.get_vec())
+        print("Cost: $", format(product.cost(), ",.2f"))
+        product.set_vec(carDesignVec)
+        print("COTSCar vec:", product.get_vec())
+        print("Car vec:", product.car.get_vec())
+        print("Cost: $", format(product.cost(), ",.2f"))
+        self.assertEqual(carDesignVec, product.get_vec())
+
     def test_minimize_cots(self):
         def round_x(x):
             for i in range(len(x)):
