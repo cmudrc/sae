@@ -1055,10 +1055,10 @@ class COTSCar:
             self.car.lia = attenuators.at[val, "length"]
         elif i == 11:
             self.cabin = val
-            self.car.hc = attenuators.at[val, "height"]
-            self.car.lc = attenuators.at[val, "width"]
-            self.car.wc = attenuators.at[val, "length"]
-            self.car.tc = attenuators.at[val, "thickness"]
+            self.car.hc = cabins.at[val, "height"]
+            self.car.lc = cabins.at[val, "width"]
+            self.car.wc = cabins.at[val, "length"]
+            self.car.tc = cabins.at[val, "thickness"]
         elif i == 12:
             self.front_tire_pressure = val
             self.car.Pft = pressure.at[val, "pressure"]
